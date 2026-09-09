@@ -26,7 +26,6 @@ ships inside every API response and should never be dropped from the UI.
 
 ### Contents
 
-- [Status](#status-running-with-the-core-defences-verified)
 - [Start here](#start-here)
 - [Endpoints](#endpoints)
 - [How each check works](#how-each-check-works)
@@ -38,26 +37,6 @@ ships inside every API response and should never be dropped from the UI.
 
 ---
 
-> ## Status: running, with the core defences verified
->
-> This code was AI-generated from the team's plan document and, until 2026-09-08, **had never
-> been executed** — it could not even be imported. Since then the app boots, and the
-> cryptographic and identity-binding paths have been verified by running them, not by reading
-> them.
->
-> **Verified working:** Aadhaar Secure QR signature verification, the QR-replay defence,
-> the tiered verdict engine, the marksheet total check, Verhoeff, and redaction.
-> **Frontend:** a React verification workspace, animated image-derived scan preview,
-> forensic map viewer, guided camera capture, and searchable history are available in `frontend/`.
-> **Still unverified or absent:** ELA accuracy against real splices and deepfake/presentation-attack
-> detection. Browser flow tests use synthetic inputs; physical-camera accuracy is a separate check.
->
-> Anything still marked **[NOT IMPLEMENTED]** below is genuinely absent. Do not claim it.
-> Current status and the ordered task list live in
-> [`docs/PROJECT_STATE.md`](docs/PROJECT_STATE.md).
-
----
-
 ## Start here
 
 | You want to… | Read |
@@ -66,8 +45,8 @@ ships inside every API response and should never be dropped from the UI.
 | Know what actually works, and the ordered task list | [`docs/PROJECT_STATE.md`](docs/PROJECT_STATE.md) |
 | Brief the team — state, the replay attack, direction | [`docs/briefing.html`](docs/briefing.html) |
 | Understand the project, decisions, and open questions | [`docs/PROJECT_STATE.md`](docs/PROJECT_STATE.md) |
-| Know the security holes and the legal position | [`docs/ADVISORY_OPUS.md`](docs/ADVISORY_OPUS.md) |
-| See the file-by-file code audit | [`docs/CODE_AUDIT_SONNET.md`](docs/CODE_AUDIT_SONNET.md) |
+| Know the security holes and the legal position | [`docs/ADVISORY.md`](docs/ADVISORY.md) |
+| See the file-by-file code audit | [`docs/CODE_AUDIT.md`](docs/CODE_AUDIT.md) |
 
 Quick start, in full detail in `docs/SETUP.md`:
 
@@ -285,7 +264,7 @@ If you want a real number, MIDV-2020 and DocTamper are public datasets you can m
 UIDAI's published certificate is the intended offline path and needs no database access. Be
 precise: you are not a registered AUA/KUA, you query nothing, you store no identifiers, and
 demo data came from teammates asked directly. A fuller treatment, with the specific statutes,
-is in `docs/ADVISORY_OPUS.md` — verify its legal citations before quoting them.
+is in `docs/ADVISORY.md` — verify its legal citations before quoting them.
 
 **"How does this scale beyond a demo?"** Signature verification is a few milliseconds of RSA
 and scales trivially. The real costs are face-match compute and, for genuine PAN or board

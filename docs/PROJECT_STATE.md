@@ -124,8 +124,8 @@ offline e-KYC signature validation on its
 
 ### Audit status
 
-- `docs/CODE_AUDIT_SONNET.md` — **landed.** File-by-file audit. Summary in §2.2.
-- `docs/ADVISORY_OPUS.md` — **landed.** Threat model, forgery-defence analysis, legal position,
+- `docs/CODE_AUDIT.md` — **landed.** File-by-file audit. Summary in §2.2.
+- `docs/ADVISORY.md` — **landed.** Threat model, forgery-defence analysis, legal position,
   ranked improvements. Its headline findings are summarised in §7.5.
 
 ### 2.2 Audit findings — confirmed by independent re-check
@@ -137,7 +137,7 @@ Each of these was verified directly, not taken on the audit's word.
 | 1 | **The app could not start at all.** `main.py:30-33` used relative imports (`from .config`, `from .services import ...`) requiring a package layout that does not exist — flat repo, no `__init__.py`, no `services/`. | Read `main.py:30-33`; `ls -a` confirms flat layout | **FIXED** on branch `fix/runnable` |
 | 2 | `pymupdf` imported unconditionally at `main.py:25`, absent from `requirements.txt`. Genuinely used at `main.py:371,385` to rasterise PDF uploads. | Grep confirms real usage | **FIXED** — pinned in requirements |
 | 3 | `config.py:11` `uidai_cert_path` had **no type annotation**, so it was a plain class attribute, not a dataclass field — no env-var override, unlike every sibling setting. Precisely the setting you most need to point at a file. | Read `config.py:9-13` | **FIXED** — now `str` with `UIDAI_CERT_PATH` override |
-| 4 | **`marksheet.py` has a dead headline feature.** `printed_total` / `printed_percentage` fields and the `TOTAL_MISMATCH` / `TOTAL_CONSISTENT` / `PERCENTAGE_MISMATCH` reason codes exist in the dataclass, the reason catalogue, and the structural-problem set — but nothing in `analyse()` ever assigns those fields or emits those codes. | Per audit, file:line cited in `CODE_AUDIT_SONNET.md` | **FIXED** — implemented and verified, see task N3 |
+| 4 | **`marksheet.py` has a dead headline feature.** `printed_total` / `printed_percentage` fields and the `TOTAL_MISMATCH` / `TOTAL_CONSISTENT` / `PERCENTAGE_MISMATCH` reason codes exist in the dataclass, the reason catalogue, and the structural-problem set — but nothing in `analyse()` ever assigns those fields or emits those codes. | Per audit, file:line cited in `CODE_AUDIT.md` | **FIXED** — implemented and verified, see task N3 |
 | 5 | `verhoeff.py` is correct — verified by *execution*, not reading: a valid 12-digit number passes, the same number with one digit changed fails. | Audit ran it standalone | Verified good |
 | 6 | `face_match.py` threshold direction is correct (distance ≤ threshold → match, for a cosine *distance* metric). | Audit checked; suspected inversion did not exist | Verified good |
 | 7 | No frontend of any kind. Zero `.html` / `.jsx` / Streamlit files. Two JSON endpoints only. | `ls`, audit sweep | **OPEN — Ved's slot** |
@@ -213,7 +213,7 @@ Error Level Analysis detects JPEG recompression inconsistency. Two problems:
 **Implication:** ELA may stay as a *supporting* heuristic signal that flags a region for human
 attention. It must never on its own produce a verdict a user would read as "forged." If a
 judge asks about accuracy and the answer rests on ELA, the team loses. See
-`docs/ADVISORY_OPUS.md` for the assessment of whether the current code respects this line.
+`docs/ADVISORY.md` for the assessment of whether the current code respects this line.
 
 ### 4.4 The replay attack is the question the team will be asked
 
@@ -300,7 +300,7 @@ property no single module owner will catch.
 | Date | Decision | Rationale |
 |---|---|---|
 | 2026-09-08 | Work in `D:\dev\SiH_Verif`, clone of upstream | Session scratch workspace is ephemeral; needs a durable home |
-| 2026-09-08 | Split review across two agents: Opus for advisory/threat model, Sonnet for mechanical code audit | Separates "is the approach right" from "is this code worth keeping" so neither biases the other |
+| 2026-09-08 | Split review into two passes: advisory/threat model, then mechanical code audit | Separates "is the approach right" from "is this code worth keeping" so neither biases the other |
 | 2026-09-08 | MD5-based file verification rejected as a primary mechanism | §4.1 — a hash needs a trusted reference; none exists for an unseen document |
 | 2026-09-08 | Scope locked to the plan document as written (internal college round, not a national SIH PS) | Confirmed with Ved |
 | 2026-09-08 | Plan for a days-to-two-weeks budget; every workstream ordered to be stoppable at any point | Confirmed with Ved |
@@ -314,7 +314,7 @@ property no single module owner will catch.
 
 ## 7.5 Advisory findings — verified
 
-Full analysis in `docs/ADVISORY_OPUS.md`. The two highest-stakes findings were re-verified by
+Full analysis in `docs/ADVISORY.md`. The two highest-stakes findings were re-verified by
 reading the code directly; both confirmed exactly as reported.
 
 ### A. The QR-replay hole is OPEN — and the README claims it is closed
