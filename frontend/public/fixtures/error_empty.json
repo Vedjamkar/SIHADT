@@ -1,0 +1,5 @@
+{
+  "_fixture": "error_empty",
+  "status": 400,
+  "detail": "Empty upload"
+}

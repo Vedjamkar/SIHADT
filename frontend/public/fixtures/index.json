@@ -1,0 +1,96 @@
+[
+  {
+    "name": "genuine_signed",
+    "verdict": "GENUINE_SIGNED",
+    "binding": "NOT_ATTEMPTED"
+  },
+  {
+    "name": "forged_signature",
+    "verdict": "FORGED_SIGNATURE",
+    "binding": "NOT_ATTEMPTED"
+  },
+  {
+    "name": "signed_but_altered",
+    "verdict": "SIGNED_BUT_ALTERED",
+    "binding": "NOT_BOUND"
+  },
+  {
+    "name": "structurally_invalid",
+    "verdict": "STRUCTURALLY_INVALID",
+    "binding": "NOT_ATTEMPTED"
+  },
+  {
+    "name": "needs_review",
+    "verdict": "NEEDS_REVIEW",
+    "binding": "NOT_ATTEMPTED"
+  },
+  {
+    "name": "unverifiable_pan",
+    "verdict": "UNVERIFIABLE",
+    "binding": "NOT_ATTEMPTED"
+  },
+  {
+    "name": "unverifiable_no_qr",
+    "verdict": "UNVERIFIABLE",
+    "binding": "NOT_ATTEMPTED"
+  },
+  {
+    "name": "unverifiable_legacy_v1",
+    "verdict": "UNVERIFIABLE",
+    "binding": "NOT_ATTEMPTED"
+  },
+  {
+    "name": "unverifiable_no_certificate",
+    "verdict": "UNVERIFIABLE",
+    "binding": "NOT_ATTEMPTED"
+  },
+  {
+    "name": "binding_bound",
+    "verdict": "GENUINE_SIGNED",
+    "binding": "BOUND"
+  },
+  {
+    "name": "binding_not_bound",
+    "verdict": "GENUINE_SIGNED",
+    "binding": "NOT_BOUND"
+  },
+  {
+    "name": "binding_liveness_failed",
+    "verdict": "GENUINE_SIGNED",
+    "binding": "LIVENESS_FAILED"
+  },
+  {
+    "name": "binding_not_attempted",
+    "verdict": "GENUINE_SIGNED",
+    "binding": "NOT_ATTEMPTED"
+  },
+  {
+    "name": "error_consent",
+    "status": 403
+  },
+  {
+    "name": "error_empty",
+    "status": 400
+  },
+  {
+    "name": "error_too_large",
+    "status": 413
+  },
+  {
+    "name": "error_bad_pdf",
+    "status": 400
+  },
+  {
+    "name": "error_few_frames",
+    "status": 400
+  },
+  {
+    "name": "error_network",
+    "status": 0
+  },
+  {
+    "name": "binding_check_failed",
+    "verdict": "GENUINE_SIGNED",
+    "binding": "CHECK_FAILED"
+  }
+]

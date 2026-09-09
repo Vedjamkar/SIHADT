@@ -1,0 +1,5 @@
+{
+  "_fixture": "error_consent",
+  "status": 403,
+  "detail": "'priya' is not in the consent list. Ask them directly, then add them to CONSENT_SUBJECTS."
+}

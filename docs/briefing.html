@@ -1,0 +1,589 @@
+<title>Examination of Our Own System</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&family=Spectral:ital,wght@0,300;0,400;0,600;1,400&display=swap">
+<style>
+  :root {
+    --paper:      #f4f2ec;
+    --paper-deep: #eae6dc;
+    --ink:        #1c1b18;
+    --ink-mid:    #55524a;
+    --ink-light:  #8a857a;
+    --rule:       #cfc9ba;
+    --rule-hair:  #ded9cc;
+
+    /* One annotation ink. Used only where the reader must act. */
+    --annot:      #a8341f;
+    /* Diagram-only. Never page chrome. */
+    --signed:     #23407a;
+
+    --serif: Spectral, Georgia, "Iowan Old Style", "Times New Roman", serif;
+    --type:  "Courier Prime", "Courier New", ui-monospace, monospace;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper:      #17171a;
+      --paper-deep: #1f1f23;
+      --ink:        #e4e0d6;
+      --ink-mid:    #a09b90;
+      --ink-light:  #736e64;
+      --rule:       #3a3833;
+      --rule-hair:  #2b2a26;
+      --annot:      #e07a5f;
+      --signed:     #7d9ad6;
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper:      #17171a;
+    --paper-deep: #1f1f23;
+    --ink:        #e4e0d6;
+    --ink-mid:    #a09b90;
+    --ink-light:  #736e64;
+    --rule:       #3a3833;
+    --rule-hair:  #2b2a26;
+    --annot:      #e07a5f;
+    --signed:     #7d9ad6;
+  }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--serif);
+    font-size: 17px;
+    font-weight: 300;
+    line-height: 1.62;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .sheet {
+    max-width: 60rem;
+    margin: 0 auto;
+    padding: clamp(2rem, 5vw, 4rem) clamp(1.1rem, 4vw, 2.5rem) 5rem;
+  }
+
+  /* ---------- masthead ---------- */
+  .masthead { border-bottom: 2px solid var(--ink); padding-bottom: 1.1rem; }
+  .masthead h1 {
+    font-family: var(--serif);
+    font-weight: 600;
+    font-size: clamp(1.9rem, 4.4vw, 2.7rem);
+    line-height: 1.12;
+    letter-spacing: -0.012em;
+    margin: 0 0 0.5rem;
+    text-wrap: balance;
+  }
+  .masthead .sub {
+    font-style: italic;
+    color: var(--ink-mid);
+    max-width: 44ch;
+    margin: 0;
+  }
+  .docket {
+    font-family: var(--type);
+    font-size: 0.7rem;
+    letter-spacing: 0.02em;
+    color: var(--ink-light);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 1.6rem;
+    margin: 0 0 1.4rem;
+  }
+
+  /* ---------- the margin/measure grid ---------- */
+  .row {
+    display: grid;
+    grid-template-columns: 7.5rem minmax(0, 1fr);
+    gap: 0 2rem;
+    align-items: start;
+  }
+  .margin {
+    font-family: var(--type);
+    font-size: 0.7rem;
+    line-height: 1.5;
+    color: var(--ink-light);
+    text-align: right;
+    padding-top: 0.42rem;
+  }
+  .margin b { display: block; font-weight: 700; color: var(--ink-mid); }
+  .margin .act { color: var(--annot); font-weight: 700; }
+  @media (max-width: 46rem) {
+    .row { grid-template-columns: 1fr; gap: 0.25rem; }
+    .margin { text-align: left; padding-top: 0; }
+    .margin b { display: inline; margin-right: 0.6rem; }
+  }
+
+  section { margin-top: 2.8rem; }
+  h2 {
+    font-family: var(--serif);
+    font-weight: 600;
+    font-size: 1.42rem;
+    line-height: 1.22;
+    margin: 0 0 0.9rem;
+    text-wrap: balance;
+  }
+  h3 {
+    font-family: var(--serif);
+    font-weight: 600;
+    font-size: 1.06rem;
+    margin: 1.7rem 0 0.5rem;
+  }
+  p { margin: 0 0 0.95rem; max-width: 64ch; }
+  p:last-child { margin-bottom: 0; }
+  .lead { font-size: 1.09rem; }
+
+  code, .t { font-family: var(--type); font-size: 0.84em; }
+  em.term { font-style: italic; }
+  strong { font-weight: 600; }
+
+  /* ---------- ledger ---------- */
+  table { border-collapse: collapse; width: 100%; margin: 0.4rem 0 0.5rem; }
+  caption {
+    font-family: var(--type); font-size: 0.7rem; color: var(--ink-light);
+    text-align: left; padding-bottom: 0.5rem;
+  }
+  th {
+    font-family: var(--type); font-weight: 400; font-size: 0.68rem;
+    letter-spacing: 0.04em; text-transform: uppercase; color: var(--ink-light);
+    text-align: left; padding: 0 0.9rem 0.4rem 0;
+    border-bottom: 1px solid var(--rule);
+  }
+  td {
+    padding: 0.5rem 0.9rem 0.5rem 0;
+    border-bottom: 1px solid var(--rule-hair);
+    vertical-align: baseline;
+    font-size: 0.95rem;
+  }
+  td:last-child, th:last-child { padding-right: 0; }
+  .state { font-family: var(--type); font-size: 0.76rem; white-space: nowrap; }
+  .state.bad { color: var(--annot); }
+  tr.needs td { background: transparent; }
+
+  /* ---------- findings ---------- */
+  .finding { margin-top: 1.9rem; }
+  .finding .margin .no {
+    font-size: 1.5rem; font-weight: 700; color: var(--ink);
+    display: block; line-height: 1;
+  }
+  .finding.act .margin .no { color: var(--annot); }
+
+  ol.walk { margin: 0.2rem 0 0; padding-left: 1.15rem; max-width: 62ch; }
+  ol.walk li { margin-bottom: 0.55rem; padding-left: 0.3rem; }
+  ol.walk li::marker { font-family: var(--type); font-size: 0.8rem; color: var(--annot); }
+
+  blockquote {
+    margin: 1.1rem 0;
+    padding-left: 1.1rem;
+    border-left: 2px solid var(--annot);
+    font-style: italic;
+    color: var(--ink-mid);
+    max-width: 58ch;
+  }
+  blockquote p { margin-bottom: 0; }
+
+  /* ---------- figures ---------- */
+  figure { margin: 1.3rem 0 0.4rem; }
+  .plate {
+    border-top: 1px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
+    padding: 1.3rem 0;
+    overflow-x: auto;
+  }
+  figure svg { display: block; width: 100%; height: auto; min-width: 29rem; }
+  figcaption {
+    font-family: var(--type); font-size: 0.72rem; line-height: 1.55;
+    color: var(--ink-light); margin-top: 0.6rem; max-width: 58ch;
+  }
+  figcaption b { color: var(--ink-mid); font-weight: 700; }
+
+  /* ---------- closing ---------- */
+  .colophon {
+    margin-top: 3.2rem; padding-top: 1.1rem; border-top: 2px solid var(--ink);
+    font-family: var(--type); font-size: 0.72rem; line-height: 1.7; color: var(--ink-light);
+  }
+  .colophon b { color: var(--ink-mid); font-weight: 700; }
+  hr.thin { border: 0; border-top: 1px solid var(--rule-hair); margin: 2.4rem 0 0; }
+</style>
+
+<div class="sheet">
+
+  <div class="masthead">
+    <p class="docket">
+      <span>SiH_Verif</span>
+      <span>8 September 2026</span>
+      <span>internal — not for circulation outside the team</span>
+    </p>
+    <h1>Examination of our own system</h1>
+    <p class="sub">What the verification backend does, what it only claims to do, and the one
+      gap that decides how the demonstration goes.</p>
+  </div>
+
+  <!-- ================= 1 ================= -->
+  <section class="row">
+    <div class="margin"><b>Section 1</b>Condition on<br>examination</div>
+    <div>
+      <h2>The code ran for the first time today</h2>
+      <p class="lead">Until this morning the backend could not start at all. <code>main.py</code>
+        imported from a package structure that does not exist in the repository, so no part of it
+        had ever executed. That is repaired. Every module now imports, the API serves, and the
+        cryptographic path has been exercised end to end against generated cards.</p>
+      <p>What follows is a condition report rather than a progress report. The architecture is
+        sound — the tiered verdicts, the refusal to print the word <em class="term">verified</em>,
+        the consent requirement written into the code rather than onto a whiteboard. The defects
+        below are things not yet written, or written and never run, and they are now visible
+        individually instead of hiding behind a README.</p>
+
+      <table>
+        <caption>Component condition, established by execution where marked</caption>
+        <thead>
+          <tr><th style="width:34%">Component</th><th>Finding</th><th style="width:20%">State</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Aadhaar QR signature</td>
+            <td>Decodes a QR from an image, verifies RSA-2048 over SHA-256, parses all sixteen fields.</td>
+            <td class="state">sound, tested</td>
+          </tr>
+          <tr>
+            <td>Mock certificate authority</td>
+            <td>Signs cards in UIDAI's own format. No real Aadhaar and no UIDAI certificate required.</td>
+            <td class="state">sound, tested</td>
+          </tr>
+          <tr>
+            <td>Verhoeff checksum</td>
+            <td>Valid numbers pass; a single altered digit fails.</td>
+            <td class="state">sound, tested</td>
+          </tr>
+          <tr class="needs">
+            <td>Verdict engine</td>
+            <td>Tiering and reason codes are well judged, but a valid signature currently suppresses a failed checksum.</td>
+            <td class="state bad">defective</td>
+          </tr>
+          <tr class="needs">
+            <td>Face-match binding</td>
+            <td>Compares the selfie against the printed photograph, which a forger supplies. See Finding 1.</td>
+            <td class="state bad">defective</td>
+          </tr>
+          <tr class="needs">
+            <td>Marksheet arithmetic</td>
+            <td>Reason codes exist and are catalogued; the check itself was never written.</td>
+            <td class="state bad">absent</td>
+          </tr>
+          <tr class="needs">
+            <td>ELA tamper detection</td>
+            <td>Fires on nearly every image, and is meaningless on a photograph of a printout.</td>
+            <td class="state bad">unreliable</td>
+          </tr>
+          <tr>
+            <td>Interface</td>
+            <td>None. The API's own documentation page serves as the interim console.</td>
+            <td class="state">not begun</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <hr class="thin">
+
+  <!-- ================= 2 ================= -->
+  <section class="row finding act">
+    <div class="margin"><span class="no">1</span><span class="act">requires action</span></div>
+    <div>
+      <h2>The signature protects the QR code and nothing else</h2>
+      <p class="lead">An Aadhaar card has two parts and only one of them is protected. Every
+        consequence below follows from that single fact.</p>
+
+      <figure>
+        <div class="plate">
+          <svg viewBox="0 0 740 268" role="img" aria-label="An Aadhaar card in two zones. The printed front, carrying photograph, name and number, is unsigned and can be reprinted by anyone. Only the QR code on the back is covered by the UIDAI signature, and it carries its own copy of the holder's photograph.">
+            <g font-family="Courier Prime, Courier New, monospace">
+              <!-- front -->
+              <rect x="18" y="46" width="312" height="158" fill="none" stroke="currentColor" stroke-width="1" stroke-dasharray="5 4" opacity="0.5"></rect>
+              <text x="18" y="34" font-size="11" fill="currentColor" opacity="0.75">CARD FRONT — printed</text>
+
+              <rect x="40" y="70" width="66" height="80" fill="currentColor" opacity="0.13"></rect>
+              <circle cx="73" cy="97" r="15" fill="currentColor" opacity="0.34"></circle>
+              <path d="M51 146 Q73 116 95 146 Z" fill="currentColor" opacity="0.34"></path>
+              <text x="73" y="166" font-size="10" text-anchor="middle" fill="currentColor" opacity="0.7">photograph</text>
+
+              <line x1="124" y1="82" x2="306" y2="82" stroke="currentColor" stroke-width="6" opacity="0.17"></line>
+              <line x1="124" y1="102" x2="276" y2="102" stroke="currentColor" stroke-width="6" opacity="0.17"></line>
+              <line x1="124" y1="122" x2="292" y2="122" stroke="currentColor" stroke-width="6" opacity="0.17"></line>
+              <text x="124" y="152" font-size="10" fill="currentColor" opacity="0.7">name · date of birth · number</text>
+
+              <line x1="18" y1="186" x2="330" y2="186" stroke="currentColor" opacity="0.25"></line>
+              <text x="174" y="200" font-size="11.5" text-anchor="middle" fill="#a8341f">UNSIGNED — anyone may print this</text>
+
+              <!-- back -->
+              <rect x="410" y="46" width="312" height="158" fill="none" stroke="#23407a" stroke-width="2"></rect>
+              <text x="410" y="34" font-size="11" fill="currentColor" opacity="0.75">CARD BACK — the QR code</text>
+
+              <rect x="432" y="70" width="80" height="80" fill="none" stroke="#23407a" stroke-width="1"></rect>
+              <rect x="440" y="78" width="20" height="20" fill="#23407a"></rect>
+              <rect x="484" y="78" width="20" height="20" fill="#23407a"></rect>
+              <rect x="440" y="122" width="20" height="20" fill="#23407a"></rect>
+              <rect x="469" y="105" width="11" height="11" fill="#23407a"></rect>
+              <rect x="486" y="126" width="11" height="11" fill="#23407a"></rect>
+
+              <text x="530" y="84" font-size="10.5" fill="currentColor">name · date of birth</text>
+              <text x="530" y="103" font-size="10.5" fill="currentColor">number · address</text>
+              <text x="530" y="122" font-size="10.5" font-weight="700" fill="#23407a">a second photograph</text>
+              <text x="530" y="141" font-size="10.5" fill="currentColor">UIDAI signature</text>
+
+              <line x1="410" y1="186" x2="722" y2="186" stroke="#23407a" opacity="0.4"></line>
+              <text x="566" y="200" font-size="11.5" text-anchor="middle" fill="#23407a">SIGNED — one altered byte breaks it</text>
+
+              <text x="370" y="128" font-size="17" text-anchor="middle" fill="currentColor" opacity="0.3">|</text>
+              <text x="370" y="248" font-size="10.5" text-anchor="middle" fill="currentColor" opacity="0.72">the QR carries its own copy of the holder, including their face</text>
+            </g>
+          </svg>
+        </div>
+        <figcaption><b>Plate I.</b> The signature covers the bytes of the QR payload. The
+          photograph, name and number printed on the paper around it are ordinary ink.</figcaption>
+      </figure>
+
+      <h3>How a forger passes the system as it stands</h3>
+      <ol class="walk">
+        <li>Photograph a stranger's genuine Aadhaar — the QR on the back alone. It is signed by
+          UIDAI, and copying it does not change that.</li>
+        <li>Print a fresh card carrying <strong>your own face and name</strong> on the front and
+          <strong>their genuine QR</strong> on the back.</li>
+        <li>The system verifies the QR. The signature is valid, because it truly is UIDAI's.
+          Verdict: <code>GENUINE_SIGNED</code>.</li>
+        <li>The system then compares the live selfie against the photograph <strong>on the
+          front</strong> — your own face, because you printed it. Binding: <code>BOUND</code>.</li>
+        <li>Every check has passed. The card is a forgery.</li>
+      </ol>
+
+      <blockquote>
+        <p>“Can't a forger simply copy a real QR code?” is the likeliest question we will be
+          asked, because it is the obvious objection to the entire idea. Today the honest answer
+          is yes, and the system reports it genuine.</p>
+      </blockquote>
+
+      <figure>
+        <div class="plate">
+          <svg viewBox="0 0 740 300" role="img" aria-label="Two panels compared. In the present system the live selfie is matched against the printed front photograph, which the forger supplied, so the forgery is accepted. In the corrected system the selfie is matched against the photograph sealed inside the signed QR payload, which the forger cannot alter, so the mismatch is detected.">
+            <defs>
+              <marker id="tip-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                <polygon points="0,0 10,5 0,10" fill="#a8341f"></polygon>
+              </marker>
+              <marker id="tip-b" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                <polygon points="0,0 10,5 0,10" fill="#23407a"></polygon>
+              </marker>
+            </defs>
+            <g font-family="Courier Prime, Courier New, monospace">
+              <line x1="370" y1="18" x2="370" y2="286" stroke="currentColor" stroke-width="1" opacity="0.18"></line>
+
+              <!-- present -->
+              <text x="18" y="26" font-size="11.5" fill="#a8341f">AS IT STANDS — the forgery is accepted</text>
+
+              <rect x="18" y="46" width="78" height="60" fill="currentColor" opacity="0.13"></rect>
+              <circle cx="57" cy="69" r="12" fill="currentColor" opacity="0.34"></circle>
+              <path d="M39 100 Q57 76 75 100 Z" fill="currentColor" opacity="0.34"></path>
+              <text x="57" y="122" font-size="10" text-anchor="middle" fill="currentColor">live selfie</text>
+
+              <rect x="196" y="46" width="78" height="60" fill="currentColor" opacity="0.13"></rect>
+              <circle cx="235" cy="69" r="12" fill="currentColor" opacity="0.34"></circle>
+              <path d="M217 100 Q235 76 253 100 Z" fill="currentColor" opacity="0.34"></path>
+              <text x="235" y="122" font-size="10" text-anchor="middle" fill="currentColor">printed photo</text>
+              <text x="235" y="136" font-size="9.5" text-anchor="middle" fill="#a8341f">supplied by the forger</text>
+
+              <line x1="102" y1="76" x2="188" y2="76" stroke="#a8341f" stroke-width="1.4" marker-end="url(#tip-a)"></line>
+              <text x="145" y="68" font-size="9.5" text-anchor="middle" fill="#a8341f">matched against</text>
+
+              <line x1="18" y1="176" x2="290" y2="176" stroke="currentColor" opacity="0.25"></line>
+              <text x="18" y="196" font-size="10.5" fill="currentColor" opacity="0.75">signature valid</text>
+              <text x="18" y="213" font-size="11" font-weight="700" fill="currentColor">GENUINE_SIGNED</text>
+              <text x="18" y="240" font-size="10.5" fill="#a8341f">faces agree</text>
+              <text x="18" y="257" font-size="11" font-weight="700" fill="#a8341f">BOUND — forgery accepted</text>
+
+              <!-- corrected -->
+              <text x="402" y="26" font-size="11.5" fill="#23407a">AS IT MUST BE — the forgery is caught</text>
+
+              <rect x="402" y="46" width="78" height="60" fill="currentColor" opacity="0.13"></rect>
+              <circle cx="441" cy="69" r="12" fill="currentColor" opacity="0.34"></circle>
+              <path d="M423 100 Q441 76 459 100 Z" fill="currentColor" opacity="0.34"></path>
+              <text x="441" y="122" font-size="10" text-anchor="middle" fill="currentColor">live selfie</text>
+
+              <rect x="580" y="46" width="78" height="60" fill="none" stroke="#23407a" stroke-width="1.6"></rect>
+              <circle cx="619" cy="69" r="12" fill="#23407a" opacity="0.45"></circle>
+              <path d="M601 100 Q619 76 637 100 Z" fill="#23407a" opacity="0.45"></path>
+              <text x="619" y="122" font-size="10" text-anchor="middle" fill="#23407a">photo inside the QR</text>
+              <text x="619" y="136" font-size="9.5" text-anchor="middle" fill="#23407a">sealed — cannot be swapped</text>
+
+              <line x1="486" y1="76" x2="572" y2="76" stroke="#23407a" stroke-width="1.4" marker-end="url(#tip-b)"></line>
+              <text x="529" y="68" font-size="9.5" text-anchor="middle" fill="#23407a">matched against</text>
+
+              <line x1="402" y1="176" x2="674" y2="176" stroke="#23407a" opacity="0.3"></line>
+              <text x="402" y="196" font-size="10.5" fill="currentColor" opacity="0.75">signature valid</text>
+              <text x="402" y="213" font-size="11" font-weight="700" fill="currentColor">GENUINE_SIGNED</text>
+              <text x="402" y="240" font-size="10.5" fill="#23407a">faces disagree</text>
+              <text x="402" y="257" font-size="11" font-weight="700" fill="#23407a">NOT_BOUND — QR transplanted</text>
+            </g>
+          </svg>
+        </div>
+        <figcaption><b>Plate II.</b> The correction is a change of which photograph we trust: the
+          copy sealed inside the signature, never the one printed on the paper. The same applies
+          to the name and number — check the printed text against the signed fields.</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <hr class="thin">
+
+  <!-- ================= 3 ================= -->
+  <section class="row finding">
+    <div class="margin"><span class="no">2</span>settled</div>
+    <div>
+      <h2>We sign our own cards</h2>
+      <p>Verifying real Aadhaar cards requires UIDAI's production certificate, which is a
+        procurement errand, and real people's identity documents, which brings consent and
+        privacy obligations into an internal round for no gain in technical merit. We operate our
+        own certificate authority instead.</p>
+      <p>This is not a staged demonstration. The payload format, the RSA-2048 signature, the
+        SHA-256 digest, the field framing and the embedded photograph are exactly what UIDAI
+        emits; only the signing key differs. The verification code runs its ordinary path with
+        nothing stubbed or bypassed. Substitute UIDAI's certificate and the same code verifies
+        real cards — which is a stronger thing to say to an examiner than any excuse for not
+        having one.</p>
+
+      <table>
+        <caption>Generated specimens, each verified through the real pipeline</caption>
+        <thead>
+          <tr><th style="width:28%">Specimen</th><th>Character</th><th style="width:26%">Result</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="t">card</td>
+            <td>Genuine, correctly signed</td>
+            <td class="state">QR_SIGNATURE_VALID</td>
+          </tr>
+          <tr>
+            <td class="t">tamper</td>
+            <td>One byte altered after signing; the name visibly reads <code>@sha Devi</code></td>
+            <td class="state bad">QR_SIGNATURE_INVALID</td>
+          </tr>
+          <tr>
+            <td class="t">replay</td>
+            <td>Genuine QR, a different face on the front</td>
+            <td class="state bad">accepted — our test for Finding 1</td>
+          </tr>
+        </tbody>
+      </table>
+      <p>Every specimen is synthetic. Nobody surrenders their Aadhaar and nothing on screen needs
+        blurring, which answers the privacy question better than a disclaimer does.</p>
+    </div>
+  </section>
+
+  <hr class="thin">
+
+  <!-- ================= 4 ================= -->
+  <section class="row">
+    <div class="margin"><b>Section 2</b>Order of<br>work</div>
+    <div>
+      <h2>Ordered so that stopping anywhere still leaves a demonstration</h2>
+      <p>Nothing lower begins while anything higher is open. If time runs out mid-list, everything
+        above the cut still forms something coherent to show.</p>
+
+      <h3>First — make the claims true <span class="t" style="color:var(--ink-light)">(about a day)</span></h3>
+      <p>Match the selfie against the signed photograph, and check the printed name and number
+        against the signed fields; this closes Finding 1 and converts our hardest question into
+        our best answer. Stop a valid signature from suppressing a failed checksum — one
+        <code>elif</code> in the verdict engine. Write the marksheet total check, which is
+        deterministic, explainable, and the moment we point at when asked to catch a forgery
+        live. Make redaction actually mask the name, date of birth and address, since that is our
+        own stated constraint.</p>
+
+      <h3>Second — stop accusing honest documents <span class="t" style="color:var(--ink-light)">(half a day)</span></h3>
+      <p>Raise the ELA threshold above its own noise floor and never let it raise a flag alone.
+        Mark it inapplicable to photographs of printouts, because printing destroys the very
+        evidence the method depends upon. Saying so plainly is a strength; a false accusation
+        costs an honest person far more than a missed forgery costs us.</p>
+
+      <h3>Third — the face people see <span class="t" style="color:var(--ink-light)">(remaining time)</span></h3>
+      <p>A React console showing the verdict, the reasons in plain language, and the history.
+        Then rehearse the four demonstration steps against generated specimens, so that nothing
+        is seen for the first time in front of an audience.</p>
+    </div>
+  </section>
+
+  <hr class="thin">
+
+  <!-- ================= 5 ================= -->
+  <section class="row">
+    <div class="margin"><b>Section 3</b>Whose problem<br>this is</div>
+    <div>
+      <h2>Three people stand around one document, and all three lose</h2>
+      <p>Every technical decision above should trace to somebody's actual difficulty. Before more
+        is built, it is worth being exact about whose.</p>
+
+      <p><strong>The verifier</strong> — a recruiter screening a candidate, an admissions desk, a
+        bank's compliance officer. They are handed a photocopy and have no means of telling it
+        from a competent forgery, so they glance at it and absorb the risk. Verifying properly
+        with the issuing university takes weeks, costs money, and frequently receives no reply.</p>
+
+      <p><strong>The holder</strong> — an applicant, a student, someone claiming a scheme they are
+        entitled to. Their papers are genuine, yet they wait to be believed, submit the same
+        documents again to every new institution, and can be turned away over a poor scan or a
+        faded print. They carry the cost of a system that cannot distinguish truth from forgery.</p>
+
+      <p><strong>The issuer</strong> — a university or board answering verification requests by
+        telephone and email, one at a time, by hand. They have no way to demonstrate at scale what
+        they did and did not issue, while forged versions of their certificates circulate.</p>
+
+      <blockquote>
+        <p>The verifier's difficulty and the holder's difficulty are one problem seen from two
+          sides, and they pull against each other. Tuned to catch every forgery, a system wrongly
+          flags honest people with imperfect paperwork; tuned never to offend, it catches nothing.</p>
+      </blockquote>
+
+      <p>This is precisely why the verdict ladder exists, and why it is the product rather than a
+        technicality. Separating <em class="term">this is forged</em> from <em class="term">we
+        could not confirm this</em> means the second answer sends a person to a human being
+        instead of rejecting them.</p>
+
+      <p>It also shows where to aim next. The holder's worst difficulty — proving the same genuine
+        documents over and over — is not addressed by better forgery detection at all. It is
+        addressed by documents that can prove themselves: signed once at source, checkable by
+        anyone, indefinitely. That is the argument for issuer-side signing, and a register of
+        issuance and revocation is the one place a ledger genuinely earns its keep, because a
+        signature can prove what was issued but cannot withdraw it.</p>
+    </div>
+  </section>
+
+  <hr class="thin">
+
+  <!-- ================= 6 ================= -->
+  <section class="row">
+    <div class="margin"><b>Section 4</b>Position</div>
+    <div>
+      <h2>What can honestly be claimed</h2>
+      <p>Without something cryptographic to check, software can detect <em class="term">some</em>
+        forgeries but can never establish authenticity. That is a limit of the problem, not of our
+        effort or our skill, and stating it plainly is worth more than any accuracy figure we
+        could invent.</p>
+      <p>Where we can genuinely go further than existing practice is the camera. Ordinary
+        know-your-customer checks verify the credential and then trust whatever the lens is
+        shown. Our own liveness test is a blink check, defeated by playing a video on a telephone
+        screen. Detecting screen replay and presentation attacks is a real contribution and the
+        strongest honest answer to why this is better than what already exists.</p>
+      <blockquote>
+        <p>We verify the credential cryptographically, bind it to a living person, and are candid
+          about the documents where cryptography is unavailable.</p>
+      </blockquote>
+      <p>Everything in this report exists so that sentence can be said truthfully.</p>
+    </div>
+  </section>
+
+  <div class="colophon">
+    <b>Supporting papers, in the repository.</b><br>
+    docs/PROJECT_STATE.md — status, decisions and open questions<br>
+    docs/ADVISORY_OPUS.md — threat model and legal position<br>
+    docs/CODE_AUDIT_SONNET.md — file-by-file audit<br>
+    docs/SETUP.md — installation, including the two native binaries pip does not provide<br>
+    tools/mock_pki.py — the certificate authority and specimen generator
+  </div>
+
+</div>

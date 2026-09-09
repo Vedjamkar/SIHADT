@@ -1,0 +1,683 @@
+/*
+  components.css
+  ---------------------------------------------------------------------------
+  Semantic component classes. No component .tsx files existed in
+  frontend/src at the time this was written (only the default Vite
+  scaffold), so these are styled defensively against the class-name
+  contract in the design brief. Every class below is additive / BEM-style
+  so the React side can compose them freely:
+
+    .verdict-card, .verdict-card--{genuine-signed|forged-signature|
+      signed-but-altered|structurally-invalid|needs-review|unverifiable}
+    .verdict-card__eyebrow, .verdict-card__title, .verdict-card__claim,
+    .verdict-card__meta
+    .tier-badge, .tier-badge--{cryptographic|structural|heuristic}
+    .reason-list, .reason-item, .reason-item--{cryptographic|structural|
+      heuristic}, .reason-item__code, .reason-item__text
+    .binding-axis, .binding-axis__state,
+      .binding-axis__state--{bound|not-bound|liveness-failed|not-attempted}
+    .upload-zone, .upload-zone--{idle|dragging|uploading|done|error}
+    .dashboard-grid, .dashboard-card, .dashboard-stat,
+      .dashboard-stat__value, .dashboard-stat__label, .dashboard-trend,
+      .dashboard-table
+    .app-shell, .app-header, .disclaimer-banner
+
+  If the other agent's actual class names differ, this file's selectors
+  should be renamed to match rather than duplicated — the tokens in
+  tokens.css are the part that must not drift.
+*/
+
+/* ===========================================================================
+   App shell
+   =========================================================================== */
+.app-shell {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: var(--color-bg);
+}
+
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-4) var(--space-6);
+  border-bottom: var(--border-width-thin) solid var(--color-border);
+  background: var(--color-surface);
+}
+
+.app-header__brand {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  font-family: var(--font-display);
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--text-lg);
+  letter-spacing: var(--letter-spacing-tight);
+}
+
+.app-header__brand-mark {
+  color: var(--tier-cryptographic-accent);
+}
+
+.app-header__nav {
+  display: flex;
+  gap: var(--space-5);
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+}
+
+.app-main {
+  flex: 1;
+  width: 100%;
+  max-width: 72rem;
+  margin: 0 auto;
+  padding: var(--space-6);
+}
+
+/* A bordered rectangle, not a pill — the toggle is a control, not a status
+   chip, so it takes the same hairline-border language as every other
+   surface in the instrument rather than a rounded capsule. */
+.theme-toggle {
+  border: var(--border-width-thin) solid var(--color-border);
+  background: var(--color-surface);
+  border-radius: 2px;
+  padding: var(--space-1) var(--space-3);
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+  transition: border-color var(--duration-fast) var(--ease-standard),
+    color var(--duration-fast) var(--ease-standard);
+}
+
+.theme-toggle:hover {
+  border-color: var(--color-border-strong);
+  color: var(--color-text-primary);
+}
+
+/* ===========================================================================
+   Corner brackets — registration marks borrowed from document-scanner /
+   identity-capture UIs (Onfido, Persona, Veriff, Adobe Scan). Any frame
+   that hosts them needs `position: relative` (that's `.bracket-frame`);
+   the marks themselves are absolutely positioned, sized, and coloured
+   here so CornerBrackets.tsx stays a plain, unstyled set of four spans.
+   =========================================================================== */
+.bracket-frame {
+  position: relative;
+}
+
+.corner-bracket {
+  position: absolute;
+  width: 1.1rem;
+  height: 1.1rem;
+  border: 0 solid var(--tier-cryptographic-accent);
+  opacity: 0.85;
+  pointer-events: none;
+}
+
+.corner-bracket--tl {
+  top: -1px;
+  left: -1px;
+  border-top-width: 2px;
+  border-left-width: 2px;
+}
+
+.corner-bracket--tr {
+  top: -1px;
+  right: -1px;
+  border-top-width: 2px;
+  border-right-width: 2px;
+}
+
+.corner-bracket--bl {
+  bottom: -1px;
+  left: -1px;
+  border-bottom-width: 2px;
+  border-left-width: 2px;
+}
+
+.corner-bracket--br {
+  bottom: -1px;
+  right: -1px;
+  border-bottom-width: 2px;
+  border-right-width: 2px;
+}
+
+/* ===========================================================================
+   Disclaimer banner — the response's disclaimer must be surfaced, never
+   silently discarded. Neutral, quiet, permanent — not a dismissible toast.
+   =========================================================================== */
+.disclaimer-banner {
+  display: flex;
+  gap: var(--space-3);
+  align-items: flex-start;
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-bg-inset);
+  border: var(--border-width-thin) solid var(--color-border);
+  border-radius: var(--radius-md);
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm);
+  line-height: var(--line-height-snug);
+}
+
+.disclaimer-banner__icon {
+  flex: none;
+  width: 1.1em;
+  height: 1.1em;
+  margin-top: 0.15em;
+  color: var(--color-text-tertiary);
+}
+
+/* ===========================================================================
+   Upload zone
+   =========================================================================== */
+.upload-zone {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  padding: var(--space-8) var(--space-5);
+  border: var(--border-width-thick) dashed var(--color-border-strong);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  text-align: center;
+  color: var(--color-text-secondary);
+  transition: border-color var(--duration-base) var(--ease-standard),
+    background-color var(--duration-base) var(--ease-standard),
+    transform var(--duration-base) var(--ease-standard);
+}
+
+.upload-zone__icon {
+  width: 2.25rem;
+  height: 2.25rem;
+  color: var(--color-text-tertiary);
+  transition: color var(--duration-base) var(--ease-standard);
+}
+
+.upload-zone__title {
+  font-family: var(--font-display);
+  font-size: var(--text-md);
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+.upload-zone__hint {
+  font-size: var(--text-sm);
+  color: var(--color-text-tertiary);
+  margin: 0;
+}
+
+.upload-zone--dragging {
+  border-color: var(--tier-cryptographic-accent);
+  background: var(--tier-cryptographic-bg);
+  transform: scale(1.005);
+}
+
+.upload-zone--dragging .upload-zone__icon {
+  color: var(--tier-cryptographic-accent);
+}
+
+.upload-zone--uploading {
+  border-style: solid;
+  border-color: var(--color-border-strong);
+  cursor: progress;
+}
+
+.upload-zone--done {
+  border-style: solid;
+  border-color: var(--tier-cryptographic-border);
+  background: var(--color-surface);
+}
+
+.upload-zone--error {
+  border-style: solid;
+  border-color: var(--verdict-structurally-invalid-border);
+  background: var(--color-surface);
+}
+
+.upload-zone__progress {
+  width: 100%;
+  max-width: 20rem;
+  height: 0.375rem;
+  border-radius: 0;
+  background: var(--color-bg-inset);
+  overflow: hidden;
+}
+
+.upload-zone__progress-bar {
+  height: 100%;
+  width: 0%;
+  border-radius: 0;
+  background: var(--tier-cryptographic-accent);
+  transition: width var(--duration-base) var(--ease-standard);
+}
+
+/* ===========================================================================
+   Tier badge — decoration-only signal of evidence strength. Always paired
+   with a text label; colour is never the sole carrier of meaning.
+   =========================================================================== */
+/* A filled chip with a dot in it is the stock badge every generated UI
+   ships. This is a typographic mark instead: a hairline tick in the tier
+   colour, then the label. No fill, no border, no radius — it reads as an
+   annotation on a document rather than a tag on a dashboard. */
+.tier-badge {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.55em;
+  padding: 0;
+  border: 0;
+  background: none;
+  border-radius: 0;
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  font-weight: var(--font-weight-medium);
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.tier-badge::before {
+  content: "";
+  width: 2px;
+  height: 0.85em;
+  align-self: center;
+  background: currentColor;
+  flex: none;
+}
+
+.tier-badge--cryptographic {
+  color: var(--tier-cryptographic-accent);
+}
+
+.tier-badge--structural {
+  color: var(--tier-structural-accent);
+}
+
+.tier-badge--heuristic {
+  color: var(--tier-heuristic-accent);
+}
+
+/* ===========================================================================
+   Verdict card — the central artifact of the app.
+   Deliberately quiet: a flat surface with a 1px low-contrast border, the
+   same "1px border a few percent lighter than the ground" language used
+   for every other surface — no gradient wash, no drop shadow, no thick
+   coloured rail. Even FORGED_SIGNATURE must not read as a siren; the
+   verdict's colour lives only in the small eyebrow dot and tier badge,
+   never as a wash across the whole card.
+   =========================================================================== */
+.verdict-card {
+  --verdict-bg: var(--verdict-unverifiable-bg);
+  --verdict-border: var(--verdict-unverifiable-border);
+  --verdict-text: var(--verdict-unverifiable-text);
+  --verdict-accent: var(--verdict-unverifiable-accent);
+
+  position: relative;
+  padding: var(--space-6);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  border: var(--border-width-thin) solid var(--color-border);
+  color: var(--color-text-primary);
+}
+
+.verdict-card--genuine-signed {
+  --verdict-bg: var(--verdict-genuine-signed-bg);
+  --verdict-border: var(--verdict-genuine-signed-border);
+  --verdict-text: var(--verdict-genuine-signed-text);
+  --verdict-accent: var(--verdict-genuine-signed-accent);
+}
+
+.verdict-card--forged-signature {
+  --verdict-bg: var(--verdict-forged-signature-bg);
+  --verdict-border: var(--verdict-forged-signature-border);
+  --verdict-text: var(--verdict-forged-signature-text);
+  --verdict-accent: var(--verdict-forged-signature-accent);
+}
+
+.verdict-card--signed-but-altered {
+  --verdict-bg: var(--verdict-signed-but-altered-bg);
+  --verdict-border: var(--verdict-signed-but-altered-border);
+  --verdict-text: var(--verdict-signed-but-altered-text);
+  --verdict-accent: var(--verdict-signed-but-altered-accent);
+}
+
+.verdict-card--structurally-invalid {
+  --verdict-bg: var(--verdict-structurally-invalid-bg);
+  --verdict-border: var(--verdict-structurally-invalid-border);
+  --verdict-text: var(--verdict-structurally-invalid-text);
+  --verdict-accent: var(--verdict-structurally-invalid-accent);
+}
+
+.verdict-card--needs-review {
+  --verdict-bg: var(--verdict-needs-review-bg);
+  --verdict-border: var(--verdict-needs-review-border);
+  --verdict-text: var(--verdict-needs-review-text);
+  --verdict-accent: var(--verdict-needs-review-accent);
+}
+
+/* UNVERIFIABLE reuses the default (unverifiable) custom properties above,
+   whose accent is a plain neutral grey — no tier hue at all — so it
+   visually recedes rather than competing with genuine failures for
+   attention; no further override needed now that every verdict card
+   shares one flat, borderless-of-accent surface. */
+
+.verdict-card__eyebrow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-xs);
+  font-weight: var(--font-weight-medium);
+  letter-spacing: var(--letter-spacing-wider);
+  text-transform: uppercase;
+  color: var(--verdict-text);
+  margin-bottom: var(--space-2);
+}
+
+.verdict-card__eyebrow::before {
+  content: "";
+  width: 0.5em;
+  height: 0.5em;
+  border-radius: 50%;
+  background: var(--verdict-accent);
+  flex: none;
+}
+
+.verdict-card__title {
+  font-family: var(--font-display);
+  font-size: var(--text-2xl);
+  font-weight: var(--font-weight-display);
+  letter-spacing: -0.018em;
+  line-height: 1.15;
+  color: var(--color-text-primary);
+  margin: 0 0 var(--space-2);
+}
+
+.verdict-card__claim {
+  font-size: var(--text-md);
+  color: var(--color-text-secondary);
+  max-width: 42rem;
+  margin: 0 0 var(--space-4);
+}
+
+.verdict-card__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: center;
+  font-size: var(--text-sm);
+  color: var(--color-text-tertiary);
+}
+
+/* ===========================================================================
+   Reason list — the evidence trail. Reasons read top-to-bottom in tier
+   order; each carries its own tier badge so no reason borrows authority
+   it did not earn.
+   =========================================================================== */
+.reason-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-top: var(--space-5);
+}
+
+.reason-item {
+  display: flex;
+  gap: var(--space-3);
+  align-items: flex-start;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  border: var(--border-width-thin) solid var(--color-border);
+  will-change: transform, opacity;
+}
+
+.reason-item--cryptographic {
+  border-left: 0.2rem solid var(--tier-cryptographic-accent);
+}
+
+.reason-item--structural {
+  border-left: 0.2rem solid var(--tier-structural-accent);
+}
+
+.reason-item--heuristic {
+  border-left: 0.2rem solid var(--tier-heuristic-accent);
+}
+
+.reason-item__body {
+  flex: 1;
+  min-width: 0;
+}
+
+.reason-item__code {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--color-text-tertiary);
+  letter-spacing: var(--letter-spacing-wide);
+  margin-bottom: var(--space-1);
+  overflow-wrap: anywhere;
+}
+
+.reason-item__text {
+  font-size: var(--text-base);
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+/* ===========================================================================
+   Binding axis — identity_binding. A DIFFERENT visual language from the
+   verdict card on purpose: a horizontal strip of small pill-states in a
+   teal/cyan-grey hue family that appears nowhere in the verdict palette,
+   so it can never be mistaken for part of the verdict.
+   =========================================================================== */
+.binding-axis {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-inset);
+  border: var(--border-width-thin) solid var(--color-border);
+}
+
+.binding-axis__label {
+  font-size: var(--text-xs);
+  font-weight: var(--font-weight-medium);
+  letter-spacing: var(--letter-spacing-wider);
+  text-transform: uppercase;
+  color: var(--color-text-tertiary);
+  flex: none;
+}
+
+/* Stated, not badged. The binding is one of the two headline findings on
+   this page — putting it in a chip made it look like metadata. */
+.binding-axis__state {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 0;
+  border: 0;
+  background: none;
+  border-radius: 0;
+  font-size: var(--text-sm);
+  font-weight: var(--font-weight-medium);
+}
+
+.binding-axis__dot {
+  width: 2px;
+  height: 0.9em;
+  border-radius: 0;
+  flex: none;
+  background: currentColor;
+}
+
+.binding-axis__state--bound {
+  background: var(--binding-bound-bg);
+  border-color: var(--binding-bound-border);
+  color: var(--binding-bound-text);
+}
+
+.binding-axis__state--bound .binding-axis__dot {
+  color: var(--binding-bound-accent);
+}
+
+.binding-axis__state--not-bound {
+  background: var(--binding-not-bound-bg);
+  border-color: var(--binding-not-bound-border);
+  color: var(--binding-not-bound-text);
+}
+
+.binding-axis__state--not-bound .binding-axis__dot {
+  color: var(--binding-not-bound-accent);
+}
+
+.binding-axis__state--liveness-failed {
+  background: var(--binding-liveness-failed-bg);
+  border-color: var(--binding-liveness-failed-border);
+  color: var(--binding-liveness-failed-text);
+}
+
+.binding-axis__state--liveness-failed .binding-axis__dot {
+  color: var(--binding-liveness-failed-accent);
+}
+
+.binding-axis__state--not-attempted {
+  background: var(--binding-not-attempted-bg);
+  border-color: var(--binding-not-attempted-border);
+  color: var(--binding-not-attempted-text);
+  border-style: dashed;
+}
+
+.binding-axis__state--not-attempted .binding-axis__dot {
+  color: var(--binding-not-attempted-accent);
+  opacity: 0.6;
+}
+
+/* ===========================================================================
+   Dashboard
+   =========================================================================== */
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: var(--space-4);
+  margin-bottom: var(--space-6);
+}
+
+.dashboard-card {
+  padding: var(--space-5);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  border: var(--border-width-thin) solid var(--color-border);
+  box-shadow: var(--shadow-sm);
+}
+
+.dashboard-card__title {
+  font-size: var(--text-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-wide);
+  margin: 0 0 var(--space-3);
+}
+
+.dashboard-stat {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+}
+
+.dashboard-stat__value {
+  font-family: var(--font-display);
+  font-size: var(--text-2xl);
+  font-weight: var(--font-weight-display);
+  letter-spacing: -0.018em;
+  color: var(--color-text-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+.dashboard-stat__label {
+  font-size: var(--text-sm);
+  color: var(--color-text-tertiary);
+}
+
+.dashboard-trend {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.2rem;
+  height: 3rem;
+  margin-top: var(--space-3);
+}
+
+.dashboard-trend__bar {
+  flex: 1;
+  min-width: 2px;
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+  background: var(--tier-cryptographic-accent);
+  opacity: 0.75;
+  transform-origin: bottom;
+}
+
+.dashboard-table-wrap {
+  overflow-x: auto; /* wide tables scroll in their own box, never the page */
+  border-radius: var(--radius-lg);
+  border: var(--border-width-thin) solid var(--color-border);
+}
+
+.dashboard-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--text-sm);
+  min-width: 40rem;
+}
+
+.dashboard-table th,
+.dashboard-table td {
+  padding: var(--space-2) var(--space-3);
+  text-align: left;
+  border-bottom: var(--border-width-thin) solid var(--color-border);
+  white-space: nowrap;
+}
+
+.dashboard-table th {
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-tertiary);
+  text-transform: uppercase;
+  font-size: var(--text-xs);
+  letter-spacing: var(--letter-spacing-wide);
+  background: var(--color-bg-inset);
+}
+
+.dashboard-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* ===========================================================================
+   Responsive
+   =========================================================================== */
+@media (max-width: 40rem) {
+  .app-header {
+    padding: var(--space-3) var(--space-4);
+  }
+
+  .app-main {
+    padding: var(--space-4);
+  }
+
+  .verdict-card {
+    padding: var(--space-4);
+  }
+
+  .verdict-card__title {
+    font-size: var(--text-xl);
+  }
+
+  .binding-axis {
+    flex-wrap: wrap;
+  }
+
+  .upload-zone {
+    padding: var(--space-6) var(--space-4);
+  }
+}

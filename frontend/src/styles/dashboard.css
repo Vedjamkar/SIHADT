@@ -1,0 +1,23 @@
+.dashboard-filters {
+  display: grid;
+  grid-template-columns: minmax(12rem, 1.5fr) minmax(9rem, 1fr) minmax(12rem, 1fr);
+  gap: 1rem;
+  margin: 1.5rem 0 .5rem;
+}
+.dashboard-filters label { display: grid; gap: .4rem; font-size: var(--text-sm); color: var(--color-text-secondary); }
+.dashboard-filters input, .dashboard-filters select {
+  min-width: 0;
+  width: 100%;
+  min-height: 44px;
+  padding: .65rem .75rem;
+  border: 1px solid var(--color-border-strong);
+  border-radius: 3px;
+  background: var(--color-surface);
+  color: var(--color-text-primary);
+  font: inherit;
+}
+.dashboard-filter-summary { display: flex; justify-content: space-between; align-items: center; gap: 1rem; min-height: 3rem; font-size: var(--text-sm); color: var(--color-text-secondary); }
+.dashboard-loading { padding: 2rem 0; color: var(--color-text-secondary); }
+@media (max-width: 700px) {
+  .dashboard-filters { grid-template-columns: 1fr; }
+}

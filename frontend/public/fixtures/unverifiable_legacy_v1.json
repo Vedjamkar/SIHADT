@@ -1,0 +1,23 @@
+{
+  "_fixture": "unverifiable_legacy_v1",
+  "_source": "verdict-engine",
+  "record_id": "fixture-unverifiable_legacy_v1",
+  "verdict": "UNVERIFIABLE",
+  "headline": "Not independently verifiable",
+  "decided_by": null,
+  "identity_binding": "NOT_ATTEMPTED",
+  "reasons": [],
+  "advisory": [
+    {
+      "code": "QR_V1_LEGACY_UNSIGNED",
+      "tier": "heuristic",
+      "message": "Legacy V1 QR code carries no signature and cannot be verified."
+    }
+  ],
+  "details": {
+    "qr_version": "V1",
+    "signature_verified": null,
+    "signed_photo_available": false
+  },
+  "disclaimer": "This tool checks whether a document is internally consistent and, for Aadhaar, whether its QR payload carries a valid UIDAI signature. It does not query any government database and is not official verification."
+}

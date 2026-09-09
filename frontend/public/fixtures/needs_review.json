@@ -1,0 +1,32 @@
+{
+  "_fixture": "needs_review",
+  "_source": "verdict-engine",
+  "record_id": "fixture-needs_review",
+  "verdict": "NEEDS_REVIEW",
+  "headline": "Needs human review",
+  "decided_by": "heuristic",
+  "identity_binding": "NOT_ATTEMPTED",
+  "reasons": [
+    {
+      "code": "ELA_LOCALISED_ANOMALY",
+      "tier": "heuristic",
+      "message": "Compression analysis shows a localised anomaly. Advisory only, and common around printed text."
+    },
+    {
+      "code": "BASELINE_IRREGULARITY_ADVISORY",
+      "tier": "heuristic",
+      "message": "Some text rows sit off the common baseline. Often benign; review the highlighted rows."
+    }
+  ],
+  "advisory": [],
+  "details": {
+    "computed_total": 457,
+    "printed_total": 457,
+    "ela": {
+      "applicable": true,
+      "flagged_fraction": 0.0413,
+      "flagged_blocks": 14
+    }
+  },
+  "disclaimer": "This tool checks whether a document is internally consistent and, for Aadhaar, whether its QR payload carries a valid UIDAI signature. It does not query any government database and is not official verification."
+}

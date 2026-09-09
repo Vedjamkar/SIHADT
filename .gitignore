@@ -1,0 +1,37 @@
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+
+# Runtime artefacts
+audit.sqlite3
+*.sqlite3-journal
+
+# Never commit these. The certificate is public, but demo documents are not,
+# and a real Aadhaar image in git history cannot be removed by deleting the file.
+certs/
+*.cer
+*.pem
+*.crt
+*.der
+demo_data/
+*.jpg
+*.jpeg
+*.png
+*.pdf
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Dev server logs
+frontend_run.log
+*.log
+.claude/

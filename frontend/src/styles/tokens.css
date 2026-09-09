@@ -1,0 +1,505 @@
+/*
+  tokens.css
+  ---------------------------------------------------------------------------
+  Design tokens for the document-verification instrument.
+
+  READ THIS BEFORE CHANGING A COLOUR.
+
+  Direction: an examination report crossed with a document-scanner capture
+  UI — not a SaaS dashboard. An early pass chased Linear/Vercel and the
+  client called it correctly: "looks rather generic... vercel was a bad
+  call for making something not generic." That dark-card-in-a-void
+  register is now the default developer-tool look, which is exactly what
+  makes it generic. Two things replace it:
+
+    1. Identity-verification capture UIs (Onfido, Persona, Veriff, Sumsub,
+       Jumio; Apple Notes / Adobe Scan / Microsoft Lens): registration
+       brackets, edge detection, a measurement grid, a processing state
+       that keeps the specimen on screen and visibly works on it. That
+       grammar is functional, not decorative — it is legible as "a
+       scanner" the instant you see it.
+    2. docs/briefing.html's examination-report layout: serif display face,
+       monospaced apparatus, a margin rail, hairline rules, numbered
+       findings, figures captioned "Plate I / Plate II." The client
+       reviewed that document and did not object to it, unlike every UI
+       attempt before it.
+
+  The type numbers below (15px/24px body, light/tight display type, no
+  pure white on pure black) were originally measured off Linear and Vercel
+  with getComputedStyle and remain correct — good typography doesn't stop
+  being good typography because the source went out of fashion. What
+  changed is everything ELSE: no floating rounded card in a dark void, no
+  pill CTAs, no chip/badge language. Structure comes from ruled lines and
+  aligned columns, the way a printed report or a scanner's overlay is
+  structured, not from cards with a fill and a shadow.
+
+  This file is DARK-FIRST: the bare :root carries the dark palette (the
+  product's primary, default appearance), and light is the secondary
+  theme, defined only under the OS media query and the explicit
+  [data-theme="light"] attribute. No colour is ever defined only inside a
+  media/attribute block — every token has a value on bare :root.
+
+  The palette is not decorative. It encodes the product's central claim: this
+  tool never says "verified" — it reports a tiered degree of certainty, and
+  is explicit about what it could not determine. Three independent things
+  are colour-coded, and they are kept in three separate hue families on
+  purpose so they can never bleed into one another visually:
+
+    1. TIER  (how a reason was established)
+       --tier-cryptographic   saffron  proof: a signature was verified
+       --tier-structural      bone     deterministic: arithmetic / checksum
+       --tier-heuristic       slate    advisory only: a heuristic signal
+
+    2. VERDICT (the ladder of certainty, six rungs)
+       Each verdict borrows the hue of the tier that decided it, so the
+       *strength of evidence* is legible at a glance — a cryptographic
+       verdict and a heuristic verdict never share a colour family:
+         GENUINE_SIGNED       indigo   (cryptographic, positive)
+         FORGED_SIGNATURE     oxblood  (cryptographic, negative — its own
+                                        hue, not "indigo but red", because
+                                        confusing this with a mere heuristic
+                                        flag would be a serious failure)
+         SIGNED_BUT_ALTERED   plum     (cryptographic, contradiction — a
+                                        transplanted QR outranks a valid
+                                        signature, so it gets a hue that is
+                                        neither "pass-blue" nor "fail-red")
+         STRUCTURALLY_INVALID clay     (structural fail — same hue as the
+                                        structural tier badge)
+         NEEDS_REVIEW         mustard  (heuristic — same hue as the
+                                        heuristic tier badge; advisory only)
+         UNVERIFIABLE         stone    (NO tier colour at all — this is the
+                                        honest, neutral, non-failure outcome
+                                        for every PAN and every marksheet,
+                                        and it must look like a shrug, not
+                                        a warning)
+
+    3. IDENTITY BINDING (a wholly separate axis — who is holding the
+       document, not whether the document is genuine)
+       --binding-*  teal/cyan-grey family, used nowhere else in the system,
+       so identity_binding can never visually merge into a verdict badge.
+
+  All colours are duplicated per WCAG-safe text/border/bg roles.
+*/
+
+:root {
+  color-scheme: dark;
+
+  /* ---------------------------------------------------------------------
+     Fonts. Spectral (a text serif) carries the display voice — the
+     examination-report register of docs/briefing.html, not another
+     sans-only SaaS page. Inter stays for UI chrome, where an invisible
+     face is correct. IBM Plex Mono carries every piece of data: reason
+     codes, hashes, fingerprints, timestamps, distances, thresholds — in
+     an instrument the numbers should look like numbers.
+  --------------------------------------------------------------------- */
+  --font-display: Spectral, "Iowan Old Style", Georgia, "Times New Roman", serif;
+  --font-body: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-mono: "IBM Plex Mono", "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+
+  /* ---------------------------------------------------------------------
+     Type scale (rem).
+     Body is 15px/24px (1.6), not 16px. UI/CTA text is 13px. --text-display
+     is the 64px/1.0 hero size used for H1 only. These numbers were
+     measured off premium dark-tech references and hold up regardless of
+     which product they came from — see docs/DESIGN_SPEC.md.
+  --------------------------------------------------------------------- */
+  --text-xs: 0.75rem;      /* 12px */
+  --text-sm: 0.8125rem;    /* 13px — UI / CTA text */
+  --text-base: 0.9375rem;  /* 15px — body */
+  --text-md: 1.0625rem;    /* 17px */
+  --text-lg: 1.25rem;      /* 20px */
+  --text-xl: 1.625rem;     /* 26px */
+  --text-2xl: 2.0625rem;   /* 33px */
+  --text-3xl: 2.75rem;     /* 44px */
+  --text-display: 4rem;    /* 64px — H1 only */
+
+  --line-height-tight: 1.1;
+  --line-height-snug: 1.4;
+  --line-height-normal: 1.6;    /* 24px at 15px body */
+  --line-height-display: 1;     /* exactly 1.0 at display size, measured */
+
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  /* Display weight: light, never bold — measured off premium dark-tech
+     display type (400-510), which reads as considered where a heavy
+     weight reads as a template. */
+  --font-weight-display: 400;
+
+  --letter-spacing-tight: -0.01em;
+  --letter-spacing-display: -0.015em;   /* measured H1 tracking */
+  --letter-spacing-wide: 0.04em;
+  --letter-spacing-wider: 0.08em;
+
+  /* ---------------------------------------------------------------------
+     Spacing scale (4px base)
+  --------------------------------------------------------------------- */
+  --space-0: 0;
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 3rem;
+  --space-8: 4rem;
+  --space-9: 6rem;
+
+  /* ---------------------------------------------------------------------
+     Radii / borders. No pills, chips or badges anywhere in this system —
+     raised three times by the client. A small text element never gets a
+     background fill and a radius; it is set as type (an eyebrow header, a
+     ruled row, a mono index) instead. --radius-full is kept defined only
+     so a stray reference resolves to something sane; nothing in the app
+     should use it. Cards use a modest radius; most structure comes from
+     hairline rules and aligned columns, not boxes at all.
+     No shadows anywhere: dark UI separates surfaces with a 1px
+     low-contrast border, never elevation — shadows read as light-theme
+     thinking and are the fastest way back to "generic". Shadow tokens
+     are kept (set to `none`) only so nothing accidentally reintroduces
+     one; they are identical in both themes, so they need no override.
+  --------------------------------------------------------------------- */
+  --radius-sm: 0.25rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1.25rem;
+  --radius-full: 9999px;
+
+  --border-width-thin: 1px;
+  --border-width-thick: 2px;
+
+  --shadow-sm: none;
+  --shadow-md: none;
+  --shadow-lg: none;
+  --shadow-inset: none;
+
+  /* ---------------------------------------------------------------------
+     Motion — durations and easings. See src/motion for usage.
+     "Considered", not snappy: this app tells people their documents may
+     be forged. Nothing bounces, nothing celebrates. The motion BUDGET
+     itself is spent almost entirely on one hero sequence (see
+     src/motion/heroSequence.ts) — everything else here is interaction
+     feedback only (hover, drag, a state settling).
+  --------------------------------------------------------------------- */
+  --duration-instant: 80ms;
+  --duration-fast: 150ms;
+  --duration-base: 220ms;
+  --duration-slow: 380ms;
+  --duration-slower: 600ms;
+  --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --ease-considered: cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* ---------------------------------------------------------------------
+     Base neutrals — dark, default. #08090A: near-black with a faint cool
+     cast, less severe than pure #000 — closer to a darkroom or a bench
+     under a lamp than a void. Text sits off pure white (#F7F8F8) on
+     purpose — pure white on pure black is a tell.
+  --------------------------------------------------------------------- */
+  --color-bg: #08090a;
+  --color-bg-inset: #0c0d0f;
+  --color-surface: #0d0e10;
+  --color-surface-raised: #131417;
+  --color-border: #1f2023;
+  --color-border-strong: #2e3033;
+  --color-text-primary: #f7f8f8;
+  --color-text-secondary: #8a8f98;
+  --color-text-tertiary: #62666e;
+  --color-text-on-accent: #08090a;
+  --color-link: #e9a23b;
+  --color-focus-ring: #e9a23b;
+  --color-overlay: rgb(0 0 0 / 0.6);
+
+  /* Light rectangle on dark, inverted — the one CTA style used everywhere. */
+  --color-cta-bg: #e5e5e6;
+  --color-cta-bg-hover: #ffffff;
+  --color-cta-text: #08090a;
+
+  /* ---------------------------------------------------------------------
+     TIER — how a reason was established
+  --------------------------------------------------------------------- */
+  --tier-cryptographic-bg: #2a1e08;
+  --tier-cryptographic-border: #5c4413;
+  --tier-cryptographic-text: #f0d5a0;
+  --tier-cryptographic-accent: #e9a23b;
+
+  --tier-structural-bg: #1f1e1b;
+  --tier-structural-border: #3b3934;
+  --tier-structural-text: #d8d2c4;
+  --tier-structural-accent: #a89f8c;
+
+  --tier-heuristic-bg: #191b1e;
+  --tier-heuristic-border: #303439;
+  --tier-heuristic-text: #b4bac2;
+  --tier-heuristic-accent: #7c848f;
+
+  /* ---------------------------------------------------------------------
+     VERDICT — the six-rung certainty ladder
+  --------------------------------------------------------------------- */
+  --verdict-genuine-signed-bg: #2a1e08;
+  --verdict-genuine-signed-border: #5c4413;
+  --verdict-genuine-signed-text: #f0d5a0;
+  --verdict-genuine-signed-accent: #e9a23b;
+
+  --verdict-forged-signature-bg: #2b1513;
+  --verdict-forged-signature-border: #55251f;
+  --verdict-forged-signature-text: #eab8b1;
+  --verdict-forged-signature-accent: #c9524a;
+
+  --verdict-signed-but-altered-bg: #2e1a12;
+  --verdict-signed-but-altered-border: #5c3320;
+  --verdict-signed-but-altered-text: #f0c4ad;
+  --verdict-signed-but-altered-accent: #dd7a4a;
+
+  --verdict-structurally-invalid-bg: #1f1e1b;
+  --verdict-structurally-invalid-border: #3b3934;
+  --verdict-structurally-invalid-text: #d8d2c4;
+  --verdict-structurally-invalid-accent: #a89f8c;
+
+  --verdict-needs-review-bg: #191b1e;
+  --verdict-needs-review-border: #303439;
+  --verdict-needs-review-text: #b4bac2;
+  --verdict-needs-review-accent: #7c848f;
+
+  /* UNVERIFIABLE: cool neutral grey, no hue at all. Must read as
+     "we don't know", never as a warning. */
+  --verdict-unverifiable-bg: #17181a;
+  --verdict-unverifiable-border: #2b2c2f;
+  --verdict-unverifiable-text: #c7c8cb;
+  --verdict-unverifiable-accent: #9a9da3;
+
+  /* ---------------------------------------------------------------------
+     IDENTITY BINDING — separate axis, separate hue family (teal/cyan-grey)
+  --------------------------------------------------------------------- */
+  --binding-bound-bg: #12211f;
+  --binding-bound-border: #234641;
+  --binding-bound-text: #a9d6d1;
+  --binding-bound-accent: #4d9a92;
+
+  --binding-not-bound-bg: #1c1e1d;
+  --binding-not-bound-border: #34373a;
+  --binding-not-bound-text: #b7bdb6;
+  --binding-not-bound-accent: #8a9c97;
+
+  --binding-liveness-failed-bg: #101e1b;
+  --binding-liveness-failed-border: #253f38;
+  --binding-liveness-failed-text: #a9cfc4;
+  --binding-liveness-failed-accent: #5aa392;
+
+  --binding-not-attempted-bg: #17181a;
+  --binding-not-attempted-border: #2a2c2e;
+  --binding-not-attempted-text: #8b8f92;
+  --binding-not-attempted-accent: #6b6f73;
+
+  /* ---------------------------------------------------------------------
+     Utility state colours (not verdict-related — form validation, links,
+     generic system feedback only)
+  --------------------------------------------------------------------- */
+  --color-success-text: #9bcaa8;
+  --color-danger-text: #e8c2be;
+  --color-info-bg: #1a2036;
+  --color-info-text: #c7d0ee;
+}
+
+/* ===========================================================================
+   LIGHT THEME — secondary, OS preference
+   =========================================================================== */
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    color-scheme: light;
+
+    --color-bg: #ffffff;
+    --color-bg-inset: #f6f6f7;
+    --color-surface: #ffffff;
+    --color-surface-raised: #fafafa;
+    --color-border: #e7e7e9;
+    --color-border-strong: #d3d3d6;
+    --color-text-primary: #0b0c0d;
+    --color-text-secondary: #56585f;
+    --color-text-tertiary: #86888f;
+    --color-text-on-accent: #f7f8f8;
+    --color-link: #8a5a12;
+    --color-focus-ring: #8a5a12;
+    --color-overlay: rgb(20 20 22 / 0.4);
+
+    /* Dark rectangle on light, inverted the other way. */
+    --color-cta-bg: #101113;
+    --color-cta-bg-hover: #08090a;
+    --color-cta-text: #f7f8f8;
+
+    --tier-cryptographic-bg: #eaedf7;
+    --tier-cryptographic-border: #b9c3e3;
+    --tier-cryptographic-text: #2a3768;
+    --tier-cryptographic-accent: #3b4a8c;
+
+    --tier-structural-bg: #f5eee3;
+    --tier-structural-border: #dfc49e;
+    --tier-structural-text: #6b4a21;
+    --tier-structural-accent: #8b5e2b;
+
+    --tier-heuristic-bg: #f6f0dd;
+    --tier-heuristic-border: #dcc777;
+    --tier-heuristic-text: #6b5417;
+    --tier-heuristic-accent: #96751c;
+
+    --verdict-genuine-signed-bg: #eaedf7;
+    --verdict-genuine-signed-border: #b9c3e3;
+    --verdict-genuine-signed-text: #2a3768;
+    --verdict-genuine-signed-accent: #3b4a8c;
+
+    --verdict-forged-signature-bg: #f5eaea;
+    --verdict-forged-signature-border: #ddb8b6;
+    --verdict-forged-signature-text: #6b2e2c;
+    --verdict-forged-signature-accent: #8b3a34;
+
+    --verdict-signed-but-altered-bg: #f1eaf3;
+    --verdict-signed-but-altered-border: #d3b9dc;
+    --verdict-signed-but-altered-text: #5b3565;
+    --verdict-signed-but-altered-accent: #7a4a87;
+
+    --verdict-structurally-invalid-bg: #f5eee3;
+    --verdict-structurally-invalid-border: #dfc49e;
+    --verdict-structurally-invalid-text: #6b4a21;
+    --verdict-structurally-invalid-accent: #8b5e2b;
+
+    --verdict-needs-review-bg: #f6f0dd;
+    --verdict-needs-review-border: #dcc777;
+    --verdict-needs-review-text: #6b5417;
+    --verdict-needs-review-accent: #96751c;
+
+    --verdict-unverifiable-bg: #f1f0ec;
+    --verdict-unverifiable-border: #d4d0c6;
+    --verdict-unverifiable-text: #4a473e;
+    --verdict-unverifiable-accent: #6b675c;
+
+    --binding-bound-bg: #e3f0ef;
+    --binding-bound-border: #b9d9d6;
+    --binding-bound-text: #1d4a50;
+    --binding-bound-accent: #2b6e76;
+
+    --binding-not-bound-bg: #ece9e3;
+    --binding-not-bound-border: #c9cec9;
+    --binding-not-bound-text: #3f4a47;
+    --binding-not-bound-accent: #5c7a76;
+
+    --binding-liveness-failed-bg: #e9eeec;
+    --binding-liveness-failed-border: #b7cfc8;
+    --binding-liveness-failed-text: #33534a;
+    --binding-liveness-failed-accent: #3f7a6c;
+
+    --binding-not-attempted-bg: #f1f0ec;
+    --binding-not-attempted-border: #d4d0c6;
+    --binding-not-attempted-text: #857f74;
+    --binding-not-attempted-accent: #a8a399;
+
+    --color-success-text: #2f5c3f;
+    --color-danger-text: #6b2e2c;
+    --color-info-bg: #eaedf7;
+    --color-info-text: #2a3768;
+  }
+}
+
+/* ===========================================================================
+   LIGHT THEME — explicit user choice (wins over OS setting in both directions)
+   =========================================================================== */
+:root[data-theme="light"] {
+  color-scheme: light;
+
+  --color-bg: #ffffff;
+  --color-bg-inset: #f6f6f7;
+  --color-surface: #ffffff;
+  --color-surface-raised: #fafafa;
+  --color-border: #e7e7e9;
+  --color-border-strong: #d3d3d6;
+  --color-text-primary: #0b0c0d;
+  --color-text-secondary: #56585f;
+  --color-text-tertiary: #86888f;
+  --color-text-on-accent: #f7f8f8;
+  --color-link: #8a5a12;
+  --color-focus-ring: #8a5a12;
+  --color-overlay: rgb(20 20 22 / 0.4);
+
+  --color-cta-bg: #101113;
+  --color-cta-bg-hover: #08090a;
+  --color-cta-text: #f7f8f8;
+
+  --tier-cryptographic-bg: #eaedf7;
+  --tier-cryptographic-border: #b9c3e3;
+  --tier-cryptographic-text: #2a3768;
+  --tier-cryptographic-accent: #3b4a8c;
+
+  --tier-structural-bg: #f5eee3;
+  --tier-structural-border: #dfc49e;
+  --tier-structural-text: #6b4a21;
+  --tier-structural-accent: #8b5e2b;
+
+  --tier-heuristic-bg: #f6f0dd;
+  --tier-heuristic-border: #dcc777;
+  --tier-heuristic-text: #6b5417;
+  --tier-heuristic-accent: #96751c;
+
+  --verdict-genuine-signed-bg: #eaedf7;
+  --verdict-genuine-signed-border: #b9c3e3;
+  --verdict-genuine-signed-text: #2a3768;
+  --verdict-genuine-signed-accent: #3b4a8c;
+
+  --verdict-forged-signature-bg: #f5eaea;
+  --verdict-forged-signature-border: #ddb8b6;
+  --verdict-forged-signature-text: #6b2e2c;
+  --verdict-forged-signature-accent: #8b3a34;
+
+  --verdict-signed-but-altered-bg: #f1eaf3;
+  --verdict-signed-but-altered-border: #d3b9dc;
+  --verdict-signed-but-altered-text: #5b3565;
+  --verdict-signed-but-altered-accent: #7a4a87;
+
+  --verdict-structurally-invalid-bg: #f5eee3;
+  --verdict-structurally-invalid-border: #dfc49e;
+  --verdict-structurally-invalid-text: #6b4a21;
+  --verdict-structurally-invalid-accent: #8b5e2b;
+
+  --verdict-needs-review-bg: #f6f0dd;
+  --verdict-needs-review-border: #dcc777;
+  --verdict-needs-review-text: #6b5417;
+  --verdict-needs-review-accent: #96751c;
+
+  --verdict-unverifiable-bg: #f1f0ec;
+  --verdict-unverifiable-border: #d4d0c6;
+  --verdict-unverifiable-text: #4a473e;
+  --verdict-unverifiable-accent: #6b675c;
+
+  --binding-bound-bg: #e3f0ef;
+  --binding-bound-border: #b9d9d6;
+  --binding-bound-text: #1d4a50;
+  --binding-bound-accent: #2b6e76;
+
+  --binding-not-bound-bg: #ece9e3;
+  --binding-not-bound-border: #c9cec9;
+  --binding-not-bound-text: #3f4a47;
+  --binding-not-bound-accent: #5c7a76;
+
+  --binding-liveness-failed-bg: #e9eeec;
+  --binding-liveness-failed-border: #b7cfc8;
+  --binding-liveness-failed-text: #33534a;
+  --binding-liveness-failed-accent: #3f7a6c;
+
+  --binding-not-attempted-bg: #f1f0ec;
+  --binding-not-attempted-border: #d4d0c6;
+  --binding-not-attempted-text: #857f74;
+  --binding-not-attempted-accent: #a8a399;
+
+  --color-success-text: #2f5c3f;
+  --color-danger-text: #6b2e2c;
+  --color-info-bg: #eaedf7;
+  --color-info-text: #2a3768;
+}
+
+/* Explicit dark choice — pins the dark palette even if the OS is light.
+   Bare :root already carries the dark values, so this selector needs no
+   redeclarations; it exists so [data-theme="dark"] beats the light media
+   query in the cascade regardless of source order. */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+}

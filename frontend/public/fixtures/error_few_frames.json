@@ -1,0 +1,5 @@
+{
+  "_fixture": "error_few_frames",
+  "status": 400,
+  "detail": "At least 3 live frames are required for face verification."
+}

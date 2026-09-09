@@ -1,0 +1,55 @@
+{
+  "_fixture": "binding_not_bound",
+  "_source": "verdict-engine",
+  "record_id": "fixture-binding_not_bound",
+  "verdict": "GENUINE_SIGNED",
+  "headline": "Issuer-signed and unaltered",
+  "decided_by": "cryptographic",
+  "identity_binding": "NOT_BOUND",
+  "reasons": [
+    {
+      "code": "QR_SIGNATURE_VALID",
+      "tier": "cryptographic",
+      "message": "UIDAI digital signature verified. Field data is issuer-signed and unaltered."
+    }
+  ],
+  "advisory": [],
+  "details": {
+    "qr_version": "V2",
+    "signature_verified": true,
+    "layout": "two_sided_new",
+    "qr_side": "back",
+    "photo_side": "front",
+    "face_source": "signed_qr_photo",
+    "signed_photo_available": true,
+    "fields": {
+      "reference_id": "XXXX20260908012427882",
+      "name": "A********",
+      "dob": "0*********",
+      "gender": "F",
+      "district": "P***",
+      "state": "Maharashtra",
+      "pincode": "411001",
+      "vtc": "P***"
+    },
+    "aadhaar_number_source": "ocr",
+    "ocr_engine": "tesseract",
+    "ela": {
+      "applicable": false,
+      "flagged_fraction": 0.0
+    },
+    "face": {
+      "compared": true,
+      "similarity": 0.311,
+      "threshold": 0.68,
+      "model": "ArcFace",
+      "is_match": false
+    },
+    "liveness": {
+      "checked": true,
+      "passed": true,
+      "challenge": "blink"
+    }
+  },
+  "disclaimer": "This tool checks whether a document is internally consistent and, for Aadhaar, whether its QR payload carries a valid UIDAI signature. It does not query any government database and is not official verification."
+}

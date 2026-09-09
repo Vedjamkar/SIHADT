@@ -1,0 +1,26 @@
+{
+  "_fixture": "unverifiable_pan",
+  "_source": "verdict-engine",
+  "record_id": "fixture-unverifiable_pan",
+  "verdict": "UNVERIFIABLE",
+  "headline": "Not independently verifiable",
+  "decided_by": null,
+  "identity_binding": "NOT_ATTEMPTED",
+  "reasons": [],
+  "advisory": [
+    {
+      "code": "PAN_FORMAT_OK",
+      "tier": "heuristic",
+      "message": "PAN matches the expected structure."
+    }
+  ],
+  "details": {
+    "pan_present": true,
+    "pan_masked": "ABCDE****F",
+    "ela": {
+      "applicable": false,
+      "flagged_fraction": 0.0
+    }
+  },
+  "disclaimer": "This tool checks whether a document is internally consistent and, for Aadhaar, whether its QR payload carries a valid UIDAI signature. It does not query any government database and is not official verification."
+}

@@ -1,0 +1,23 @@
+{
+  "_fixture": "unverifiable_no_qr",
+  "_source": "verdict-engine",
+  "record_id": "fixture-unverifiable_no_qr",
+  "verdict": "UNVERIFIABLE",
+  "headline": "Not independently verifiable",
+  "decided_by": null,
+  "identity_binding": "NOT_ATTEMPTED",
+  "reasons": [],
+  "advisory": [
+    {
+      "code": "QR_NOT_FOUND",
+      "tier": "heuristic",
+      "message": "No QR code detected in the uploaded image."
+    }
+  ],
+  "details": {
+    "qr_version": "UNKNOWN",
+    "signature_verified": null,
+    "signed_photo_available": false
+  },
+  "disclaimer": "This tool checks whether a document is internally consistent and, for Aadhaar, whether its QR payload carries a valid UIDAI signature. It does not query any government database and is not official verification."
+}

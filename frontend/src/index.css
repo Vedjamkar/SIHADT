@@ -1,0 +1,22 @@
+/*
+ * Minimal reset only. The design system (colors, type, spacing scale) is
+ * owned by a separate agent and will land under src/styles/ — this file
+ * intentionally stays out of that agent's way.
+ */
+:root {
+  color-scheme: light dark;
+  font-family: system-ui, "Segoe UI", Roboto, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100svh;
+}
+
+#root {
+  min-height: 100svh;
+}

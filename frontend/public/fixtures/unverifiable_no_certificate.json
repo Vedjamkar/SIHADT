@@ -1,0 +1,22 @@
+{
+  "_fixture": "unverifiable_no_certificate",
+  "_source": "verdict-engine",
+  "record_id": "fixture-unverifiable_no_certificate",
+  "verdict": "UNVERIFIABLE",
+  "headline": "Not independently verifiable",
+  "decided_by": null,
+  "identity_binding": "NOT_ATTEMPTED",
+  "reasons": [],
+  "advisory": [
+    {
+      "code": "UIDAI_CERT_NOT_CONFIGURED",
+      "tier": "heuristic",
+      "message": "UIDAI public certificate not loaded, so signature checking was skipped."
+    }
+  ],
+  "details": {
+    "qr_version": "V2",
+    "signature_verified": null
+  },
+  "disclaimer": "This tool checks whether a document is internally consistent and, for Aadhaar, whether its QR payload carries a valid UIDAI signature. It does not query any government database and is not official verification."
+}

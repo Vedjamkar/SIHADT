@@ -1,0 +1,38 @@
+# Core API
+fastapi==0.115.6
+uvicorn[standard]==0.34.0
+python-multipart==0.0.20
+
+# Crypto (UIDAI signature verification)
+cryptography==44.0.0
+
+# Imaging / forensics
+pillow==11.1.0
+numpy==2.2.1
+opencv-python-headless==4.10.0.84
+
+# QR decoding (needs system libzbar: apt-get install libzbar0)
+pyzbar==0.1.9
+
+# PDF rendering (main.py rasterises PDF uploads before OCR/ELA)
+pymupdf==1.25.1
+
+# OCR (needs system tesseract: apt-get install tesseract-ocr)
+pytesseract==0.3.13
+# Optional heavier fallback, pulls torch. Install only if Tesseract struggles.
+# easyocr==1.7.2
+
+# Face match + liveness. Heavy; install last (pulls TensorFlow, ~1GB).
+# These versions are the ones actually verified to install and import on
+# Windows 11 + Python 3.12. The previously pinned deepface 0.0.93 /
+# tf-keras 2.18.0 / mediapipe 0.10.20 were never tested on this platform.
+deepface==0.0.100
+tf-keras==2.21.0
+mediapipe==1.0.1
+
+# Demo specimen generation (tools/mock_pki.py renders payloads as QR images)
+qrcode[pil]==8.2
+
+# Required by fastapi.testclient, which starlette imports lazily and only
+# complains about at runtime.
+httpx==0.28.1

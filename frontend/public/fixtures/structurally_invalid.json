@@ -1,0 +1,60 @@
+{
+  "_fixture": "structurally_invalid",
+  "_source": "verdict-engine",
+  "record_id": "fixture-structurally_invalid",
+  "verdict": "STRUCTURALLY_INVALID",
+  "headline": "Structurally invalid",
+  "decided_by": "structural",
+  "identity_binding": "NOT_ATTEMPTED",
+  "reasons": [
+    {
+      "code": "TOTAL_MISMATCH",
+      "tier": "structural",
+      "message": "Subject marks do not sum to the printed total."
+    },
+    {
+      "code": "PERCENTAGE_MISMATCH",
+      "tier": "structural",
+      "message": "Printed percentage does not follow from the printed marks."
+    }
+  ],
+  "advisory": [],
+  "details": {
+    "computed_total": 457,
+    "printed_total": 487,
+    "selected_percentage": 91.4,
+    "printed_percentage": 97.4,
+    "subjects": [
+      {
+        "name": "ENGLISH",
+        "obtained": 99,
+        "maximum": 100
+      },
+      {
+        "name": "MATHEMATICS",
+        "obtained": 94,
+        "maximum": 100
+      },
+      {
+        "name": "SCIENCE",
+        "obtained": 88,
+        "maximum": 100
+      },
+      {
+        "name": "SOCIAL SCIENCE",
+        "obtained": 91,
+        "maximum": 100
+      },
+      {
+        "name": "INFORMATION TECH",
+        "obtained": 85,
+        "maximum": 100
+      }
+    ],
+    "ela": {
+      "applicable": false,
+      "flagged_fraction": 0.0
+    }
+  },
+  "disclaimer": "This tool checks whether a document is internally consistent and, for Aadhaar, whether its QR payload carries a valid UIDAI signature. It does not query any government database and is not official verification."
+}

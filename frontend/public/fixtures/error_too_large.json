@@ -1,0 +1,5 @@
+{
+  "_fixture": "error_too_large",
+  "status": 413,
+  "detail": "File exceeds the configured size limit"
+}

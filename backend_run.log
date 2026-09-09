@@ -1,0 +1,429 @@
+INFO:     Started server process [14488]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
+INFO:     127.0.0.1:62414 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62427 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56087 - "GET /reasons HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50880 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56087 - "GET /reasons HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50880 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57073 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56163 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61268 - "OPTIONS /verify/aadhaar HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61268 - "POST /verify/aadhaar HTTP/1.1" 500 Internal Server Error
+ERROR:    Exception in ASGI application
+Traceback (most recent call last):
+  File "D:\dev\SiH_Verif\.venv\Lib\site-packages\uvicorn\protocols\http\httptools_impl.py", line 409, in run_asgi
+    result = await app(  # type: ignore[func-returns-value]
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\dev\SiH_Verif\.venv\Lib\site-packages\uvicorn\middleware\proxy_headers.py", line 60, in __call__
+    return await self.app(scope, receive, send)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\dev\SiH_Verif\.venv\Lib\site-packages\fastapi\applications.py", line 1163, in __call__
+    await super().__call__(scope, receive, send)
+  File "D:\dev\SiH_Verif\.venv\Lib\site-packages\starlette\applications.py", line 96, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "D:\dev\SiH_Verif\.venv\Lib\site-packages\starlette\middleware\errors.py", line 186, in __call__
+    raise exc
+  File "D:\dev\SiH_Verif\.venv\Lib\site-packages\starlette\middleware\errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "D:\dev\SiH_Verif\.venv\Lib\site-packages\starlette\middleware\cors.py", line 96, in __call__
+    await self.simple_response(scope, receive, send, request_headers=headers)
+  File "D:\dev\SiH_Verif\.venv\Lib\site-packages\starlette\middleware\cors.py", line 154, in simple_response
+    await self.app(scope, receive, send)
+  File "D:\dev\SiH_Verif\.venv\Lib\site-packages\starlette\middleware\exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "D:\dev\SiH_Verif\.venv\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "D:\dev\SiH_Verif\.venv\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "D:\dev\SiH_Verif\.venv\Lib\site-packages\fastapi\middleware\asyncexitstack.py", line 18, in __call__
+    await self.app(scope, receive, send)
+  File "D:\dev\SiH_Verif\.venv\Lib\site-packages\starlette\routing.py", line 670, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "D:\dev\SiH_Verif\.venv\Lib\site-packages\fastapi\routing.py", line 2734, in app
+    await route.handle(scope, receive, send)
+  File "D:\dev\SiH_Verif\.venv\Lib\site-packages\fastapi\routing.py", line 1281, in handle
+    await super().handle(scope, receive, send)
+  File "D:\dev\SiH_Verif\.venv\Lib\site-packages\starlette\routing.py", line 280, in handle
+    await self.app(scope, receive, send)
+  File "D:\dev\SiH_Verif\.venv\Lib\site-packages\fastapi\routing.py", line 158, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "D:\dev\SiH_Verif\.venv\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "D:\dev\SiH_Verif\.venv\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "D:\dev\SiH_Verif\.venv\Lib\site-packages\fastapi\routing.py", line 144, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "D:\dev\SiH_Verif\.venv\Lib\site-packages\fastapi\routing.py", line 706, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\dev\SiH_Verif\.venv\Lib\site-packages\fastapi\routing.py", line 352, in run_endpoint_function
+    return await dependant.call(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\dev\SiH_Verif\main.py", line 248, in verify_aadhaar
+    text_result = ocr.extract_text(image_bytes)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\dev\SiH_Verif\ocr.py", line 527, in extract_text
+    _extract_pan_candidates(text)
+  File "D:\dev\SiH_Verif\ocr.py", line 319, in _extract_pan_candidates
+    for match in PAN_NUMBER.findall(upper):
+                                    ^^^^^
+NameError: name 'upper' is not defined. Did you mean: 'super'?
+INFO:     127.0.0.1:56019 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53495 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61775 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61797 - "POST /verify/aadhaar HTTP/1.1" 500 Internal Server Error
+ERROR:    Exception in ASGI application
+Traceback (most recent call last):
+  File "D:\dev\SiH_Verif\.venv\Lib\site-packages\uvicorn\protocols\http\httptools_impl.py", line 409, in run_asgi
+    result = await app(  # type: ignore[func-returns-value]
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\dev\SiH_Verif\.venv\Lib\site-packages\uvicorn\middleware\proxy_headers.py", line 60, in __call__
+    return await self.app(scope, receive, send)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\dev\SiH_Verif\.venv\Lib\site-packages\fastapi\applications.py", line 1163, in __call__
+    await super().__call__(scope, receive, send)
+  File "D:\dev\SiH_Verif\.venv\Lib\site-packages\starlette\applications.py", line 96, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "D:\dev\SiH_Verif\.venv\Lib\site-packages\starlette\middleware\errors.py", line 186, in __call__
+    raise exc
+  File "D:\dev\SiH_Verif\.venv\Lib\site-packages\starlette\middleware\errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "D:\dev\SiH_Verif\.venv\Lib\site-packages\starlette\middleware\cors.py", line 88, in __call__
+    await self.app(scope, receive, send)
+  File "D:\dev\SiH_Verif\.venv\Lib\site-packages\starlette\middleware\exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "D:\dev\SiH_Verif\.venv\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "D:\dev\SiH_Verif\.venv\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "D:\dev\SiH_Verif\.venv\Lib\site-packages\fastapi\middleware\asyncexitstack.py", line 18, in __call__
+    await self.app(scope, receive, send)
+  File "D:\dev\SiH_Verif\.venv\Lib\site-packages\starlette\routing.py", line 670, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "D:\dev\SiH_Verif\.venv\Lib\site-packages\fastapi\routing.py", line 2734, in app
+    await route.handle(scope, receive, send)
+  File "D:\dev\SiH_Verif\.venv\Lib\site-packages\fastapi\routing.py", line 1281, in handle
+    await super().handle(scope, receive, send)
+  File "D:\dev\SiH_Verif\.venv\Lib\site-packages\starlette\routing.py", line 280, in handle
+    await self.app(scope, receive, send)
+  File "D:\dev\SiH_Verif\.venv\Lib\site-packages\fastapi\routing.py", line 158, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "D:\dev\SiH_Verif\.venv\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "D:\dev\SiH_Verif\.venv\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "D:\dev\SiH_Verif\.venv\Lib\site-packages\fastapi\routing.py", line 144, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "D:\dev\SiH_Verif\.venv\Lib\site-packages\fastapi\routing.py", line 706, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\dev\SiH_Verif\.venv\Lib\site-packages\fastapi\routing.py", line 352, in run_endpoint_function
+    return await dependant.call(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\dev\SiH_Verif\main.py", line 248, in verify_aadhaar
+    text_result = ocr.extract_text(image_bytes)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\dev\SiH_Verif\ocr.py", line 527, in extract_text
+    _extract_pan_candidates(text)
+  File "D:\dev\SiH_Verif\ocr.py", line 319, in _extract_pan_candidates
+    for match in PAN_NUMBER.findall(upper):
+                                    ^^^^^
+NameError: name 'upper' is not defined. Did you mean: 'super'?
+INFO:     127.0.0.1:59218 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53667 - "POST /verify/pan HTTP/1.1" 500 Internal Server Error
+ERROR:    Exception in ASGI application
+Traceback (most recent call last):
+  File "D:\dev\SiH_Verif\.venv\Lib\site-packages\uvicorn\protocols\http\httptools_impl.py", line 409, in run_asgi
+    result = await app(  # type: ignore[func-returns-value]
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\dev\SiH_Verif\.venv\Lib\site-packages\uvicorn\middleware\proxy_headers.py", line 60, in __call__
+    return await self.app(scope, receive, send)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\dev\SiH_Verif\.venv\Lib\site-packages\fastapi\applications.py", line 1163, in __call__
+    await super().__call__(scope, receive, send)
+  File "D:\dev\SiH_Verif\.venv\Lib\site-packages\starlette\applications.py", line 96, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "D:\dev\SiH_Verif\.venv\Lib\site-packages\starlette\middleware\errors.py", line 186, in __call__
+    raise exc
+  File "D:\dev\SiH_Verif\.venv\Lib\site-packages\starlette\middleware\errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "D:\dev\SiH_Verif\.venv\Lib\site-packages\starlette\middleware\cors.py", line 88, in __call__
+    await self.app(scope, receive, send)
+  File "D:\dev\SiH_Verif\.venv\Lib\site-packages\starlette\middleware\exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "D:\dev\SiH_Verif\.venv\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "D:\dev\SiH_Verif\.venv\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "D:\dev\SiH_Verif\.venv\Lib\site-packages\fastapi\middleware\asyncexitstack.py", line 18, in __call__
+    await self.app(scope, receive, send)
+  File "D:\dev\SiH_Verif\.venv\Lib\site-packages\starlette\routing.py", line 670, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "D:\dev\SiH_Verif\.venv\Lib\site-packages\fastapi\routing.py", line 2734, in app
+    await route.handle(scope, receive, send)
+  File "D:\dev\SiH_Verif\.venv\Lib\site-packages\fastapi\routing.py", line 1281, in handle
+    await super().handle(scope, receive, send)
+  File "D:\dev\SiH_Verif\.venv\Lib\site-packages\starlette\routing.py", line 280, in handle
+    await self.app(scope, receive, send)
+  File "D:\dev\SiH_Verif\.venv\Lib\site-packages\fastapi\routing.py", line 158, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "D:\dev\SiH_Verif\.venv\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "D:\dev\SiH_Verif\.venv\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "D:\dev\SiH_Verif\.venv\Lib\site-packages\fastapi\routing.py", line 144, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "D:\dev\SiH_Verif\.venv\Lib\site-packages\fastapi\routing.py", line 706, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\dev\SiH_Verif\.venv\Lib\site-packages\fastapi\routing.py", line 352, in run_endpoint_function
+    return await dependant.call(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\dev\SiH_Verif\main.py", line 470, in verify_pan
+    text_result = ocr.extract_text(image_bytes)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\dev\SiH_Verif\ocr.py", line 527, in extract_text
+    _extract_pan_candidates(text)
+  File "D:\dev\SiH_Verif\ocr.py", line 319, in _extract_pan_candidates
+    for match in PAN_NUMBER.findall(upper):
+                                    ^^^^^
+NameError: name 'upper' is not defined. Did you mean: 'super'?
+INFO:     127.0.0.1:53671 - "POST /verify/marksheet HTTP/1.1" 500 Internal Server Error
+ERROR:    Exception in ASGI application
+Traceback (most recent call last):
+  File "D:\dev\SiH_Verif\.venv\Lib\site-packages\uvicorn\protocols\http\httptools_impl.py", line 409, in run_asgi
+    result = await app(  # type: ignore[func-returns-value]
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\dev\SiH_Verif\.venv\Lib\site-packages\uvicorn\middleware\proxy_headers.py", line 60, in __call__
+    return await self.app(scope, receive, send)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\dev\SiH_Verif\.venv\Lib\site-packages\fastapi\applications.py", line 1163, in __call__
+    await super().__call__(scope, receive, send)
+  File "D:\dev\SiH_Verif\.venv\Lib\site-packages\starlette\applications.py", line 96, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "D:\dev\SiH_Verif\.venv\Lib\site-packages\starlette\middleware\errors.py", line 186, in __call__
+    raise exc
+  File "D:\dev\SiH_Verif\.venv\Lib\site-packages\starlette\middleware\errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "D:\dev\SiH_Verif\.venv\Lib\site-packages\starlette\middleware\cors.py", line 88, in __call__
+    await self.app(scope, receive, send)
+  File "D:\dev\SiH_Verif\.venv\Lib\site-packages\starlette\middleware\exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "D:\dev\SiH_Verif\.venv\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "D:\dev\SiH_Verif\.venv\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "D:\dev\SiH_Verif\.venv\Lib\site-packages\fastapi\middleware\asyncexitstack.py", line 18, in __call__
+    await self.app(scope, receive, send)
+  File "D:\dev\SiH_Verif\.venv\Lib\site-packages\starlette\routing.py", line 670, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "D:\dev\SiH_Verif\.venv\Lib\site-packages\fastapi\routing.py", line 2734, in app
+    await route.handle(scope, receive, send)
+  File "D:\dev\SiH_Verif\.venv\Lib\site-packages\fastapi\routing.py", line 1281, in handle
+    await super().handle(scope, receive, send)
+  File "D:\dev\SiH_Verif\.venv\Lib\site-packages\starlette\routing.py", line 280, in handle
+    await self.app(scope, receive, send)
+  File "D:\dev\SiH_Verif\.venv\Lib\site-packages\fastapi\routing.py", line 158, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "D:\dev\SiH_Verif\.venv\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "D:\dev\SiH_Verif\.venv\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "D:\dev\SiH_Verif\.venv\Lib\site-packages\fastapi\routing.py", line 144, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "D:\dev\SiH_Verif\.venv\Lib\site-packages\fastapi\routing.py", line 706, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\dev\SiH_Verif\.venv\Lib\site-packages\fastapi\routing.py", line 352, in run_endpoint_function
+    return await dependant.call(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\dev\SiH_Verif\main.py", line 530, in verify_marksheet
+    text_result = ocr.extract_text(
+                  ^^^^^^^^^^^^^^^^^
+  File "D:\dev\SiH_Verif\ocr.py", line 527, in extract_text
+    _extract_pan_candidates(text)
+  File "D:\dev\SiH_Verif\ocr.py", line 319, in _extract_pan_candidates
+    for match in PAN_NUMBER.findall(upper):
+                                    ^^^^^
+NameError: name 'upper' is not defined. Did you mean: 'super'?
+INFO:     127.0.0.1:53656 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64395 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54563 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62814 - "GET /reasons HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52796 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52796 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62814 - "GET /reasons HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50303 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55872 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61285 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63772 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53756 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63139 - "POST /verify/aadhaar HTTP/1.1" 400 Bad Request
+INFO:     127.0.0.1:63141 - "POST /verify/aadhaar-full HTTP/1.1" 422 Unprocessable Entity
+INFO:     127.0.0.1:63143 - "POST /verify/aadhaar-full HTTP/1.1" 403 Forbidden
+INFO:     127.0.0.1:63155 - "POST /verify/aadhaar-full HTTP/1.1" 403 Forbidden
+INFO:     127.0.0.1:63137 - "GET /reasons HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63137 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63137 - "GET /reasons HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63137 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54813 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51299 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64449 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49552 - "GET /reasons HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49552 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49552 - "GET /reasons HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49552 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62741 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63180 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58460 - "GET /reasons HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63102 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63102 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58460 - "GET /reasons HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63102 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58460 - "GET /reasons HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61240 - "GET /reasons HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50432 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61240 - "GET /reasons HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65176 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60837 - "GET /reasons HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60837 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60837 - "GET /reasons HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60837 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58086 - "OPTIONS /verify/aadhaar-full HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58086 - "POST /verify/aadhaar-full HTTP/1.1" 403 Forbidden
+INFO:     127.0.0.1:58086 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50754 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63725 - "OPTIONS /verify/aadhaar HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63725 - "POST /verify/aadhaar HTTP/1.1" 500 Internal Server Error
+ERROR:    Exception in ASGI application
+Traceback (most recent call last):
+  File "D:\dev\SiH_Verif\.venv\Lib\site-packages\uvicorn\protocols\http\httptools_impl.py", line 409, in run_asgi
+    result = await app(  # type: ignore[func-returns-value]
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\dev\SiH_Verif\.venv\Lib\site-packages\uvicorn\middleware\proxy_headers.py", line 60, in __call__
+    return await self.app(scope, receive, send)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\dev\SiH_Verif\.venv\Lib\site-packages\fastapi\applications.py", line 1163, in __call__
+    await super().__call__(scope, receive, send)
+  File "D:\dev\SiH_Verif\.venv\Lib\site-packages\starlette\applications.py", line 96, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "D:\dev\SiH_Verif\.venv\Lib\site-packages\starlette\middleware\errors.py", line 186, in __call__
+    raise exc
+  File "D:\dev\SiH_Verif\.venv\Lib\site-packages\starlette\middleware\errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "D:\dev\SiH_Verif\.venv\Lib\site-packages\starlette\middleware\cors.py", line 96, in __call__
+    await self.simple_response(scope, receive, send, request_headers=headers)
+  File "D:\dev\SiH_Verif\.venv\Lib\site-packages\starlette\middleware\cors.py", line 154, in simple_response
+    await self.app(scope, receive, send)
+  File "D:\dev\SiH_Verif\.venv\Lib\site-packages\starlette\middleware\exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "D:\dev\SiH_Verif\.venv\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "D:\dev\SiH_Verif\.venv\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "D:\dev\SiH_Verif\.venv\Lib\site-packages\fastapi\middleware\asyncexitstack.py", line 18, in __call__
+    await self.app(scope, receive, send)
+  File "D:\dev\SiH_Verif\.venv\Lib\site-packages\starlette\routing.py", line 670, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "D:\dev\SiH_Verif\.venv\Lib\site-packages\fastapi\routing.py", line 2734, in app
+    await route.handle(scope, receive, send)
+  File "D:\dev\SiH_Verif\.venv\Lib\site-packages\fastapi\routing.py", line 1281, in handle
+    await super().handle(scope, receive, send)
+  File "D:\dev\SiH_Verif\.venv\Lib\site-packages\starlette\routing.py", line 280, in handle
+    await self.app(scope, receive, send)
+  File "D:\dev\SiH_Verif\.venv\Lib\site-packages\fastapi\routing.py", line 158, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "D:\dev\SiH_Verif\.venv\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "D:\dev\SiH_Verif\.venv\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "D:\dev\SiH_Verif\.venv\Lib\site-packages\fastapi\routing.py", line 144, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "D:\dev\SiH_Verif\.venv\Lib\site-packages\fastapi\routing.py", line 706, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\dev\SiH_Verif\.venv\Lib\site-packages\fastapi\routing.py", line 352, in run_endpoint_function
+    return await dependant.call(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\dev\SiH_Verif\main.py", line 248, in verify_aadhaar
+    text_result = ocr.extract_text(image_bytes)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\dev\SiH_Verif\ocr.py", line 527, in extract_text
+    _extract_pan_candidates(text)
+  File "D:\dev\SiH_Verif\ocr.py", line 319, in _extract_pan_candidates
+    for match in PAN_NUMBER.findall(upper):
+                                    ^^^^^
+NameError: name 'upper' is not defined. Did you mean: 'super'?
+INFO:     127.0.0.1:59629 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59669 - "POST /verify/aadhaar HTTP/1.1" 500 Internal Server Error
+ERROR:    Exception in ASGI application
+Traceback (most recent call last):
+  File "D:\dev\SiH_Verif\.venv\Lib\site-packages\uvicorn\protocols\http\httptools_impl.py", line 409, in run_asgi
+    result = await app(  # type: ignore[func-returns-value]
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\dev\SiH_Verif\.venv\Lib\site-packages\uvicorn\middleware\proxy_headers.py", line 60, in __call__
+    return await self.app(scope, receive, send)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\dev\SiH_Verif\.venv\Lib\site-packages\fastapi\applications.py", line 1163, in __call__
+    await super().__call__(scope, receive, send)
+  File "D:\dev\SiH_Verif\.venv\Lib\site-packages\starlette\applications.py", line 96, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "D:\dev\SiH_Verif\.venv\Lib\site-packages\starlette\middleware\errors.py", line 186, in __call__
+    raise exc
+  File "D:\dev\SiH_Verif\.venv\Lib\site-packages\starlette\middleware\errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "D:\dev\SiH_Verif\.venv\Lib\site-packages\starlette\middleware\cors.py", line 88, in __call__
+    await self.app(scope, receive, send)
+  File "D:\dev\SiH_Verif\.venv\Lib\site-packages\starlette\middleware\exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "D:\dev\SiH_Verif\.venv\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "D:\dev\SiH_Verif\.venv\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "D:\dev\SiH_Verif\.venv\Lib\site-packages\fastapi\middleware\asyncexitstack.py", line 18, in __call__
+    await self.app(scope, receive, send)
+  File "D:\dev\SiH_Verif\.venv\Lib\site-packages\starlette\routing.py", line 670, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "D:\dev\SiH_Verif\.venv\Lib\site-packages\fastapi\routing.py", line 2734, in app
+    await route.handle(scope, receive, send)
+  File "D:\dev\SiH_Verif\.venv\Lib\site-packages\fastapi\routing.py", line 1281, in handle
+    await super().handle(scope, receive, send)
+  File "D:\dev\SiH_Verif\.venv\Lib\site-packages\starlette\routing.py", line 280, in handle
+    await self.app(scope, receive, send)
+  File "D:\dev\SiH_Verif\.venv\Lib\site-packages\fastapi\routing.py", line 158, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "D:\dev\SiH_Verif\.venv\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "D:\dev\SiH_Verif\.venv\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "D:\dev\SiH_Verif\.venv\Lib\site-packages\fastapi\routing.py", line 144, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "D:\dev\SiH_Verif\.venv\Lib\site-packages\fastapi\routing.py", line 706, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\dev\SiH_Verif\.venv\Lib\site-packages\fastapi\routing.py", line 352, in run_endpoint_function
+    return await dependant.call(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\dev\SiH_Verif\main.py", line 248, in verify_aadhaar
+    text_result = ocr.extract_text(image_bytes)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\dev\SiH_Verif\ocr.py", line 527, in extract_text
+    _extract_pan_candidates(text)
+  File "D:\dev\SiH_Verif\ocr.py", line 319, in _extract_pan_candidates
+    for match in PAN_NUMBER.findall(upper):
+                                    ^^^^^
+NameError: name 'upper' is not defined. Did you mean: 'super'?
+INFO:     127.0.0.1:59678 - "OPTIONS /verify/aadhaar HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64486 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56013 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53113 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63922 - "GET /health HTTP/1.1" 200 OK

@@ -1,0 +1,5 @@
+{
+  "_fixture": "error_bad_pdf",
+  "status": 400,
+  "detail": "Could not read that PDF: FileDataError"
+}

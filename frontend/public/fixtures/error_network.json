@@ -1,0 +1,5 @@
+{
+  "_fixture": "error_network",
+  "status": 0,
+  "detail": "Could not reach the verification server."
+}
