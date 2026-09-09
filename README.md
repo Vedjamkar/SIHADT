@@ -15,6 +15,15 @@ ships inside every API response and should never be dropped from the UI.
 
 ---
 
+|  |  |
+|---|---|
+| ![Home](docs/screenshots/01_home.png) | ![Verify](docs/screenshots/02_verify.png) |
+| ![Genuine result](docs/screenshots/03_result_genuine.png) | ![Forged result](docs/screenshots/04_result_forged.png) |
+
+![Dashboard](docs/screenshots/05_dashboard.png)
+
+---
+
 ### Contents
 
 - [Status](#status-running-with-the-core-defences-verified)
