@@ -1,11 +1,31 @@
 # Document & Identity Verification
 
+![Python](https://img.shields.io/badge/python-3.12-blue)
+![FastAPI](https://img.shields.io/badge/backend-FastAPI-009688)
+![React](https://img.shields.io/badge/frontend-React-61dafb)
+![Tests](https://img.shields.io/badge/tests-17%20passing-brightgreen)
+![License](https://img.shields.io/badge/license-MIT-lightgrey)
+
 FastAPI backend that checks whether a government or institutional document (Aadhaar, PAN,
 marksheet) is internally consistent and — for Aadhaar — whether its QR payload carries a valid
 UIDAI signature. Local/demo scope, not production.
 
 **It does not query any government database and is not official verification.** That sentence
 ships inside every API response and should never be dropped from the UI.
+
+---
+
+### Contents
+
+- [Status](#status-running-with-the-core-defences-verified)
+- [Start here](#start-here)
+- [Endpoints](#endpoints)
+- [How each check works](#how-each-check-works)
+- [The verdict engine](#the-verdict-engine)
+- [Privacy constraints](#privacy-constraints-enforced-in-code-rather-than-policy)
+- [Judge questions](#judge-questions)
+- [Repository layout](#repository-layout)
+- [Tests](#tests)
 
 ---
 
