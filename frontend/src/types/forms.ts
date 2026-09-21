@@ -14,6 +14,7 @@ export type SubmitPayload =
       challenge: "blink" | "head_turn";
     }
   | { kind: "pan"; document: File }
+  | { kind: "passport"; document: File }
   | {
       kind: "marksheet";
       document: File;

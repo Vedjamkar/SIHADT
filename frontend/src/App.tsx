@@ -7,6 +7,7 @@ import {
   verifyAadhaarFull,
   verifyMarksheet,
   verifyPan,
+  verifyPassport,
   verifyFace,
 } from "./api/client";
 import type { HealthResponse, VerifyResponse } from "./types/api";
@@ -17,6 +18,9 @@ import { HealthBanner } from "./components/HealthBanner";
 import { HomeView } from "./views/HomeView";
 import { VerifyView } from "./views/VerifyView";
 import { DashboardView } from "./components/DashboardView";
+import { OrganizerView } from "./views/OrganizerView";
+import type { OrganizerVerificationSelection } from "./views/OrganizerView";
+import { storeVerificationDocuments } from "./lib/documentStore";
 
 function App() {
   const [view, setView] = useState<View>("home");
@@ -27,6 +31,7 @@ function App() {
 
   const [uploadPhase, setUploadPhase] = useState<UploadPhase>({ status: "idle" });
   const [result, setResult] = useState<VerifyResponse | null>(null);
+  const [organizerSelection, setOrganizerSelection] = useState<OrganizerVerificationSelection | null>(null);
 
   // Fetched once at startup, per the brief: /reasons is used to translate
   // reason codes into sentences wherever the backend only sends a code
@@ -64,6 +69,13 @@ function App() {
   async function handleSubmit(payload: SubmitPayload) {
     setUploadPhase({ status: "uploading", progress: 0 });
     const onProgress = (fraction: number) => setUploadPhase({ status: "uploading", progress: fraction });
+    const filesToStore: Array<{ file: File; role: "primary" | "back" }> = [
+      { file: payload.document, role: "primary" },
+    ];
+    if ("backDocument" in payload && payload.backDocument) {
+      filesToStore.push({ file: payload.backDocument, role: "back" });
+    }
+    const localSave = storeVerificationDocuments(payload.kind, filesToStore).catch(() => []);
 
     try {
       let response: VerifyResponse;
@@ -86,6 +98,9 @@ function App() {
         case "pan":
           response = await verifyPan(payload.document, onProgress);
           break;
+        case "passport":
+          response = await verifyPassport(payload.document, onProgress);
+          break;
         case "marksheet":
           response = await verifyMarksheet(payload.document, payload.subjects, onProgress);
           break;
@@ -101,6 +116,10 @@ function App() {
           );
           break;
       }
+      await localSave;
+      await storeVerificationDocuments(payload.kind, filesToStore, response).catch(() => {
+        // Local storage should never turn a completed verification into a failed one.
+      });
       setResult(response);
       setUploadPhase({ status: "idle" });
     } catch (err) {
@@ -113,6 +132,7 @@ function App() {
   function handleCheckAnother() {
     setResult(null);
     setUploadPhase({ status: "idle" });
+    setOrganizerSelection(null);
   }
 
   function handleNavigate(nextView: View) {
@@ -125,13 +145,21 @@ function App() {
       setUploadPhase({ status: "idle" });
     }
     setView(nextView);
+    setOrganizerSelection(null);
+  }
+
+  function handleVerifyAgain(selection: OrganizerVerificationSelection) {
+    setResult(null);
+    setUploadPhase({ status: "idle" });
+    setOrganizerSelection(selection);
+    setView("verify");
   }
 
   return (
     <div className="app-shell">
       <NavBar view={view} onNavigate={handleNavigate} locked={uploadPhase.status === "uploading"} />
 
-      {view !== "home" && <HealthBanner health={health} error={healthError} />}
+      {view !== "home" && view !== "organizer" && <HealthBanner health={health} error={healthError} />}
 
       <main className="app-main">
         {view === "home" && (
@@ -139,10 +167,15 @@ function App() {
             onStartCheck={() => handleNavigate("verify")}
             onStartFace={() => handleNavigate("face")}
             onViewDashboard={() => handleNavigate("dashboard")}
+            onOpenOrganizer={() => handleNavigate("organizer")}
           />
         )}
         {view === "verify" && (
           <VerifyView
+            key={organizerSelection?.id ?? "new-verification"}
+            initialKind={organizerSelection?.kind}
+            initialDocument={organizerSelection?.document}
+            initialBackDocument={organizerSelection?.backDocument}
             phase={uploadPhase}
             result={result}
             onSubmit={handleSubmit}
@@ -159,6 +192,7 @@ function App() {
             onCheckAnother={handleCheckAnother}
           />
         )}
+        {view === "organizer" && <OrganizerView onVerifyAgain={handleVerifyAgain} />}
         {view === "dashboard" && <DashboardView reasons={reasonsDict} />}
       </main>
     </div>

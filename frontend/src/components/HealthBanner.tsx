@@ -6,9 +6,11 @@ interface HealthBannerProps {
 }
 
 /**
- * Surfaces backend health, specifically whether the UIDAI certificate is
- * loaded and pinned. Without it, the cryptographic tier is unavailable;
- * structural and advisory findings may still be returned.
+ * Surfaces backend health: whether the UIDAI certificate is loaded and
+ * pinned (without it the cryptographic tier is unavailable; structural and
+ * advisory findings may still be returned) and whether the face-pipeline
+ * model files are present (without them face match, age gap, and liveness
+ * fail fast rather than downloading mid-request).
  */
 export function HealthBanner({ health, error }: HealthBannerProps) {
   if (error) {
@@ -30,7 +32,8 @@ export function HealthBanner({ health, error }: HealthBannerProps) {
   }
 
   const certOk = health.uidai_certificate_loaded;
-  const tone = certOk ? (health.uidai_certificate_pinned ? "good" : "warn") : "bad";
+  const modelsOk = health.face_models_ready;
+  const tone = !certOk ? "bad" : health.uidai_certificate_pinned && modelsOk ? "good" : "warn";
 
   return (
     <div className={`health-banner health-banner--${tone}`} data-anim="health-banner">
@@ -53,6 +56,13 @@ export function HealthBanner({ health, error }: HealthBannerProps) {
           </>
         )}
       </span>
+      {!modelsOk && (
+        <span className="health-banner-text health-banner-models">
+          <strong>Face models missing</strong> ({health.face_models_missing.length} file(s)) — face
+          match, age gap, and liveness are unavailable until{" "}
+          <code>python tools/fetch_models.py</code> has run.
+        </span>
+      )}
       <span className="health-banner-consent">
         Consent enforcement:{" "}
         {health.consent_enforcement

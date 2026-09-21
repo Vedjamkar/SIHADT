@@ -263,6 +263,33 @@ class TestCertificatePinning(unittest.TestCase):
             )
 
 
+class TestCertificateTrustSet(unittest.TestCase):
+    def test_signature_verification_tries_every_trusted_key(self):
+        import aadhaar_qr
+
+        class RejectingKey:
+            def verify(self, *args):
+                raise ValueError("wrong signing key")
+
+        class AcceptingKey:
+            def verify(self, *args):
+                return None
+
+        self.assertTrue(
+            aadhaar_qr._verify_signature(
+                b"signature", b"signed-region", (RejectingKey(), AcceptingKey())
+            )
+        )
+        self.assertFalse(
+            aadhaar_qr._verify_signature(
+                b"signature", b"signed-region", (RejectingKey(), RejectingKey())
+            )
+        )
+        self.assertIsNone(
+            aadhaar_qr._verify_signature(b"signature", b"signed-region", ())
+        )
+
+
 class TestPassportMRZ(unittest.TestCase):
     """
     Checked against the specimen MRZ printed in the ICAO 9303 standard itself.

@@ -56,8 +56,11 @@ function validateMetadata(path: string, body: unknown): void {
   let valid = false;
   if (path === "/health") {
     valid = typeof body.status === "string" && typeof body.uidai_certificate_loaded === "boolean" &&
+      (body.uidai_certificate_fingerprint === null || typeof body.uidai_certificate_fingerprint === "string") &&
+      strings(body.uidai_certificate_fingerprints) && typeof body.uidai_certificates_loaded === "number" &&
       typeof body.uidai_certificate_pinned === "boolean" && typeof body.consent_enforcement === "boolean" &&
-      typeof body.consent_subjects_configured === "number";
+      typeof body.consent_subjects_configured === "number" && typeof body.face_models_ready === "boolean" &&
+      strings(body.face_models_missing) && typeof body.face_models_dir === "string";
   } else if (path === "/reasons") {
     valid = isRecord(body.reasons) && Object.values(body.reasons).every(item => typeof item === "string");
   } else if (path.startsWith("/dashboard/history")) {
@@ -213,6 +216,15 @@ export function verifyPan(
   const form = new FormData();
   form.append("document", document);
   return postForm<VerifyResponse>("/verify/pan", form, onProgress);
+}
+
+export function verifyPassport(
+  document: File,
+  onProgress?: (fraction: number) => void,
+): Promise<VerifyResponse> {
+  const form = new FormData();
+  form.append("document", document);
+  return postForm<VerifyResponse>("/verify/passport", form, onProgress);
 }
 
 export function verifyMarksheet(

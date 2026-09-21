@@ -16,6 +16,8 @@ interface DetailsFormProps {
   phase: UploadPhase;
   onBack: () => void;
   onSubmit: (payload: SubmitPayload) => void;
+  initialDocument?: File;
+  initialBackDocument?: File;
 }
 
 /**
@@ -26,11 +28,11 @@ interface DetailsFormProps {
  * <CheckingStatus> instead of just disabling everything and hoping the
  * spinner is enough.
  */
-export function DetailsForm({ kind, phase, onBack, onSubmit }: DetailsFormProps) {
+export function DetailsForm({ kind, phase, onBack, onSubmit, initialDocument, initialBackDocument }: DetailsFormProps) {
   const info = DOC_KIND_INFO[kind];
 
-  const [document, setDocument] = useState<File[]>([]);
-  const [backDocument, setBackDocument] = useState<File[]>([]);
+  const [document, setDocument] = useState<File[]>(initialDocument ? [initialDocument] : []);
+  const [backDocument, setBackDocument] = useState<File[]>(initialBackDocument ? [initialBackDocument] : []);
   const [frames, setFrames] = useState<File[]>([]);
   const [consentSubject, setConsentSubject] = useState("");
   const [subjects, setSubjects] = useState<string[]>(["", "", "", "", ""]);
@@ -76,6 +78,11 @@ export function DetailsForm({ kind, phase, onBack, onSubmit }: DetailsFormProps)
 
     if (kind === "pan") {
       onSubmit({ kind: "pan", document: document[0] });
+      return;
+    }
+
+    if (kind === "passport") {
+      onSubmit({ kind: "passport", document: document[0] });
       return;
     }
 
@@ -137,8 +144,8 @@ export function DetailsForm({ kind, phase, onBack, onSubmit }: DetailsFormProps)
       ) : (
         <div className="details-form__fields" data-anim="details-form-fields">
           <FileDrop
-            label={kind === "aadhaar" || kind === "aadhaar-full" ? "Aadhaar front image" : kind === "face" ? "Reference ID portrait" : "Document image"}
-            hint={kind === "face" ? "Use a clear, front-facing image of the ID portrait. Image files only." : "Image (JPEG/PNG) or PDF."}
+            label={kind === "aadhaar" || kind === "aadhaar-full" ? "Aadhaar front image" : kind === "passport" ? "Passport data page" : kind === "face" ? "Reference ID portrait" : "Document image"}
+            hint={kind === "face" ? "Use a clear, front-facing image of the ID portrait. Image files only." : kind === "passport" ? "Upload a clear image or PDF of the photo page. Keep both MRZ lines at the bottom fully visible." : "Image (JPEG/PNG) or PDF."}
             accept={kind === "face" ? "image/*" : "image/*,application/pdf"}
             files={document}
             onChange={setDocument}

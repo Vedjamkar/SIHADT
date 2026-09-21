@@ -17,6 +17,15 @@ OCR/QR working image sizes are bounded. The HTTP client rejects malformed respon
 handles timeout/abort; camera cancellation and navigation release live streams.
 Existing rounded audit scores are preserved; no audit-data migration was applied.
 
+The frontend also includes an on-device document organizer. Imported files are stored as blobs
+in browser IndexedDB, classified into editable identity, education, financial, medical, legal,
+or other folders from their filenames, and can be searched, sorted, previewed, downloaded, or
+removed. Organizer files are not sent to the verification API automatically, and live face
+captures are never added to it. Successful verification submissions are stored automatically
+with their document kind, latest verdict, identity-binding state, audit record ID, and any
+related back-side file. A saved primary document can reopen its matching verification form with
+the original front and back files already attached.
+
 Validation commands: `npm run build` and `npm run lint` in `frontend/`;
 `node --test tools/check_frontend_api.mjs`, `.venv/Scripts/python.exe -m unittest discover -s tests -v`,
 and `.venv/Scripts/python.exe tools/check_frontend_ui.py` from the repository root.
@@ -309,6 +318,7 @@ property no single module owner will catch.
 | 2026-09-08 | **Demo faces must be synthetic** — AI-generated or public-domain portraits, downloading permitted. Never a real identifiable person, never a teammate's actual ID | Ved's call. Removes the consent problem entirely and lets the face-comparison path genuinely execute |
 | 2026-09-08 | **`enforce_detection=False` is rejected** as a way to make the mock's silhouettes compare | Ved's call. Embeddings of non-faces are meaningless; it would make the demo appear to work when it does not. Honesty over a green tick |
 | 2026-09-08 | **Nothing is pushed to the remote and no PR is opened.** All work stays on local branch `fix/runnable` | Ved's call. Repo is shared with teammates; he reviews before the team sees any of this |
+| 2026-09-19 | **Model weights stay out of git; fetched by script into `models/`** | Two files exceed GitHub's 100 MB cap and Git LFS quota is not worth spending on a hackathon repo. A pinned manifest plus `tools/fetch_models.py` gives a fresh clone the same bytes, verified by hash |
 
 ---
 
@@ -482,6 +492,18 @@ lower while something above it is open.
 - [x] **Frame-count validation reordered** — it sat after the code that indexed the list.
 - [x] **Face stack resolved on Windows + Python 3.12** — mediapipe 1.0.1, deepface 0.0.100,
       TensorFlow 2.21.0 install and import cleanly. This was the audit's last open unknown.
+- [x] **Model files made reproducible (2026-09-19)** — the ~800 MB of pretrained weights
+      (ArcFace, RetinaFace, DeepFace age model, MediaPipe Face Landmarker) were only ever in
+      one developer's `~/.deepface/weights`, so a fresh clone had no face pipeline. Now
+      `face_match.REQUIRED_MODELS` pins URL + SHA-256 + size for each, `tools/fetch_models.py`
+      downloads them atomically into the gitignored `models/` (`config.py` sets
+      `DEEPFACE_HOME` there), the launcher runs it, `/health` reports `face_models_ready`,
+      and a missing file fails fast with the command to run instead of downloading inside a
+      request. Also fixed in passing: liveness was crashing with
+      `module 'mediapipe' has no attribute 'solutions'` — mediapipe 1.x removed the legacy
+      Face Mesh API; `_landmarks` now uses the Tasks `FaceLandmarker` (same 478-point
+      topology, so the EAR/yaw indices are unchanged). Verified end to end on the synthetic
+      pair: same-face match, different-face no-match, age estimate, blink/head-turn checks.
 
 Verdict behaviour, confirmed by running `assess()`:
 
@@ -509,6 +531,8 @@ Verified end to end through the real pipeline, with the mock CA certificate load
 The earlier open question is answered: a face **is** still detectable after compression to
 96×96 greyscale at ~1400 bytes for the QR budget. The first `NOT COMPARED` result was DeepFace
 downloading its weights, not a detection failure.
+(That failure mode no longer exists: `compare_faces` now refuses to run without the model
+files present and says so, rather than downloading mid-call — run `tools/fetch_models.py`.)
 
 Reproduce with:
 

@@ -81,6 +81,14 @@ test('Aadhaar identity checks send the selected challenge and accept inconclusiv
   assert.equal((await pending).identity_binding, 'CHECK_FAILED');
 });
 
+test('passport requests use the passport endpoint and expected multipart field', async () => {
+  const pending = client.verifyPassport(document);
+  assert.equal(lastRequest.url, 'http://localhost:8000/verify/passport');
+  assert.equal(lastRequest.form.get('document'), document);
+  lastRequest.finish(JSON.stringify(valid));
+  await pending;
+});
+
 test('metadata rejects invalid JSON and preserves HTTP errors', async () => {
   globalThis.fetch = async () => new Response('<html>fallback</html>');
   await assert.rejects(client.getHealth(), error => error.status === 502);

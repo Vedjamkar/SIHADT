@@ -4,13 +4,13 @@ Reviewed 2026-09-09 against the current implementation and official references.
 
 | Document | Current support | Next useful work | What a pass means |
 | --- | --- | --- | --- |
-| Passport | `passport.py` and `/verify/passport` already parse MRZs, check digits and report expiry; frontend has no passport choice | Expose existing endpoint in the document picker; test issuer specimens and OCR across TD3/TD1 layouts | Internal consistency only; a photo cannot authenticate the chip |
+| Passport | UI and `/verify/passport` accept an image/PDF data page, run MRZ-focused OCR, validate TD3/TD1 check digits, and report expiry | Test broader issuer specimens and camera conditions; NFC chip reading remains separate | Internal consistency only; a photo cannot authenticate the chip |
 | Driving licence / vehicle RC | No dedicated implementation | Prefer issuer-delivered DigiLocker records, validate signatures/trust chain, and implement consent-based requester integration | Depends on verified issuer provenance, not a plausible licence number |
 | Other national IDs with MRZ | Existing TD1 parser is a starting point | Confirm supported country/document layout before reusing it; add specimen tests and explicit unknown formats | MRZ checksums are public arithmetic, not issuer proof |
 | Voter ID and other printed cards | No dedicated implementation | Research issuer-specific verification access before adding UI claims | OCR/format checking alone cannot establish validity |
 
-Passport support is the lowest-effort extension because the backend exists. Authenticating
-an electronic passport would be separate work: an NFC reader, chip access protocols,
+Passport image scanning is available in the document picker. Authenticating an electronic
+passport would be separate work: an NFC reader, chip access protocols,
 signed data groups, passive authentication and a trusted certificate chain. The current
 browser image workflow cannot provide that evidence.
 

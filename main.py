@@ -25,6 +25,7 @@ from __future__ import annotations
 
 import io
 from difflib import SequenceMatcher
+from pathlib import Path
 from typing import Literal
 
 import pymupdf
@@ -42,7 +43,7 @@ import ocr
 import pan
 import passport
 import verhoeff
-from config import settings
+from config import UIDAI_TRUSTED_CERTIFICATES, settings
 from store import AuditStore
 from verdict import REASON_TEXT, assess
 
@@ -60,15 +61,43 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+def _load_uidai_trust_set():
+    """Load only explicitly pinned UIDAI certificates, never arbitrary files."""
+    if settings.uidai_cert_path:
+        actual = aadhaar_qr.certificate_fingerprint(settings.uidai_cert_path)
+        key = aadhaar_qr.load_uidai_public_key(
+            settings.uidai_cert_path,
+            expected_fingerprint=settings.uidai_cert_fingerprint or None,
+        )
+        return (
+            (key,) if key is not None else (),
+            (actual,) if actual is not None else (),
+            key is not None and bool(settings.uidai_cert_fingerprint),
+        )
+
+    keys = []
+    fingerprints = []
+    cert_dir = Path(settings.uidai_cert_dir)
+    for filename, expected_fingerprint in UIDAI_TRUSTED_CERTIFICATES:
+        path = cert_dir / filename
+        key = aadhaar_qr.load_uidai_public_key(
+            str(path), expected_fingerprint=expected_fingerprint
+        )
+        if key is not None:
+            keys.append(key)
+            fingerprints.append(expected_fingerprint)
+    return tuple(keys), tuple(fingerprints), bool(keys)
+
+
 store = AuditStore(settings.database_path)
-UIDAI_KEY = aadhaar_qr.load_uidai_public_key(
-    settings.uidai_cert_path,
-    expected_fingerprint=settings.uidai_cert_fingerprint or None,
+UIDAI_KEYS, UIDAI_CERT_FINGERPRINTS, UIDAI_CERTIFICATES_PINNED = (
+    _load_uidai_trust_set()
 )
-# Reported at /health so an operator can see which certificate is actually in
-# use, and whether it was pinned. A key loaded from an unpinned path is not the
-# same trust claim as one whose fingerprint we checked.
-UIDAI_CERT_FINGERPRINT = aadhaar_qr.certificate_fingerprint(settings.uidai_cert_path)
+# Backwards-compatible name used by the verification helpers and older tests.
+UIDAI_KEY = UIDAI_KEYS
+UIDAI_CERT_FINGERPRINT = (
+    UIDAI_CERT_FINGERPRINTS[0] if UIDAI_CERT_FINGERPRINTS else None
+)
 
 
 # ---------------------------------------------------------------------------
@@ -504,6 +533,12 @@ async def verify_aadhaar_full(
     )
     codes.extend(match.reasons)
 
+    age_gap = face_match.check_age_gap(
+        face_source,
+        frame_bytes[len(frame_bytes) // 2],
+    )
+    codes.extend(age_gap.reasons)
+
     ela_result = ela.analyse(front_bytes)
     codes.extend(ela_result.reasons)
 
@@ -554,6 +589,13 @@ async def verify_aadhaar_full(
                 "threshold": match.threshold,
                 "model": match.model,
                 "is_match": match.is_match,
+            },
+            "age_gap": {
+                "checked": age_gap.checked,
+                "id_age": age_gap.id_age,
+                "selfie_age": age_gap.selfie_age,
+                "gap_years": age_gap.gap_years,
+                "threshold_years": age_gap.threshold_years,
             },
             "liveness": {
                 "checked": liveness.checked,
@@ -669,7 +711,7 @@ async def verify_passport(document: UploadFile = File(...)):
         await read_upload(document), document.content_type
     )
 
-    text_result = ocr.extract_text(image_bytes)
+    text_result = ocr.extract_text(image_bytes, passport_mode=True)
     mrz = passport.parse(text_result.text)
     codes = list(mrz.reasons)
 
@@ -700,7 +742,13 @@ async def verify_passport(document: UploadFile = File(...)):
             "ela": {
                 "applicable": ela_result.applicable,
                 "flagged_fraction": round(ela_result.flagged_fraction, 4),
+                "heatmap_png_base64": ela_result.heatmap_png_base64,
             },
+            "note": (
+                "MRZ check digits establish internal consistency only. "
+                "Authenticating an electronic passport requires reading and "
+                "validating its signed chip over NFC."
+            ),
         },
         record_id,
     )
@@ -849,8 +897,9 @@ async def verify_face(
 
     liveness = face_match.check_liveness(list(frame_bytes), challenge=challenge)
     match = face_match.compare_faces(id_bytes, frame_bytes[len(frame_bytes) // 2])
+    age_gap = face_match.check_age_gap(id_bytes, frame_bytes[len(frame_bytes) // 2])
 
-    codes = liveness.reasons + match.reasons
+    codes = liveness.reasons + match.reasons + age_gap.reasons
     assessment = assess(
         codes,
         face_matched=match.is_match,
@@ -878,6 +927,13 @@ async def verify_face(
                 "threshold": match.threshold,
                 "model": match.model,
                 "is_match": match.is_match,
+            },
+            "age_gap": {
+                "checked": age_gap.checked,
+                "id_age": age_gap.id_age,
+                "selfie_age": age_gap.selfie_age,
+                "gap_years": age_gap.gap_years,
+                "threshold_years": age_gap.threshold_years,
             },
             "liveness": {
                 "checked": liveness.checked,
@@ -913,9 +969,15 @@ def reasons():
 def health():
     return {
         "status": "ok",
-        "uidai_certificate_loaded": UIDAI_KEY is not None,
+        "uidai_certificate_loaded": bool(UIDAI_KEYS),
         "uidai_certificate_fingerprint": UIDAI_CERT_FINGERPRINT,
-        "uidai_certificate_pinned": bool(settings.uidai_cert_fingerprint),
+        "uidai_certificate_fingerprints": list(UIDAI_CERT_FINGERPRINTS),
+        "uidai_certificates_loaded": len(UIDAI_KEYS),
+        "uidai_certificate_pinned": UIDAI_CERTIFICATES_PINNED,
         "consent_enforcement": settings.require_consent_subject,
         "consent_subjects_configured": len(settings.consent_subjects),
+        # Face match, age gap, and liveness all need model files that are not
+        # in git. Report them here so the launcher and the UI can say "run
+        # tools/fetch_models.py" before anyone uploads a selfie.
+        **face_match.models_status(),
     }

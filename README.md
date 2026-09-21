@@ -6,8 +6,8 @@
 ![Tests](https://img.shields.io/badge/tests-17%20passing-brightgreen)
 ![License](https://img.shields.io/badge/license-MIT-lightgrey)
 
-FastAPI backend that checks whether a government or institutional document (Aadhaar, PAN,
-marksheet) is internally consistent and — for Aadhaar — whether its QR payload carries a valid
+FastAPI backend that checks whether a government or institutional document (Aadhaar, passport,
+PAN, marksheet) is internally consistent and — for Aadhaar — whether its QR payload carries a valid
 UIDAI signature. Local/demo scope, not production.
 
 **It does not query any government database and is not official verification.** That sentence
@@ -39,6 +39,10 @@ ships inside every API response and should never be dropped from the UI.
 
 ## Start here
 
+On Windows, double-click **`Launch VERIFai.cmd`**. The launcher creates the Python
+environment, installs missing backend and frontend packages, starts both servers, and opens
+the app. Keep its window open while using VERIFai; press Ctrl+C to stop the servers it started.
+
 | You want to… | Read |
 |---|---|
 | Get it running on your machine | [`docs/SETUP.md`](docs/SETUP.md) |
@@ -47,6 +51,7 @@ ships inside every API response and should never be dropped from the UI.
 | Understand the project, decisions, and open questions | [`docs/PROJECT_STATE.md`](docs/PROJECT_STATE.md) |
 | Know the security holes and the legal position | [`docs/ADVISORY.md`](docs/ADVISORY.md) |
 | See the file-by-file code audit | [`docs/CODE_AUDIT.md`](docs/CODE_AUDIT.md) |
+| Evaluate face matching across real age gaps | [`docs/AGE_GAP_EVALUATION.md`](docs/AGE_GAP_EVALUATION.md) |
 
 Quick start, in full detail in `docs/SETUP.md`:
 
@@ -54,6 +59,7 @@ Quick start, in full detail in `docs/SETUP.md`:
 py -V:3.12 -m venv .venv
 .venv\Scripts\activate
 pip install -r requirements.txt
+python tools/fetch_models.py
 uvicorn main:app --reload --port 8000
 ```
 
@@ -68,6 +74,7 @@ Then open http://localhost:8000/docs to exercise every endpoint without a fronte
 | POST | `/verify/aadhaar` | QR decode, UIDAI signature verify, Verhoeff, ELA |
 | POST | `/verify/aadhaar-full` | The above plus face-match against the **signed** QR photo |
 | POST | `/verify/pan` | OCR, structural validation, ELA |
+| POST | `/verify/passport` | MRZ-focused OCR, ICAO check digits, expiry, and image forensics |
 | POST | `/verify/marksheet` | OCR, range checks, ELA, and the arithmetic total check |
 | POST | `/verify/face` | Standalone ID photo vs live frames |
 | GET | `/dashboard/history` | Recent checks with reasons |
@@ -115,6 +122,11 @@ generates a valid one in a `for` loop. A pass means "not obviously garbage", nev
 **PAN.** Format only: five letters, four digits, one letter, with the fourth character encoding
 holder type. There is no public check digit and no offline cryptographic material. The only
 authoritative check is the Income Tax Department's own API.
+
+**Passport.** The photo-page machine-readable zone carries ICAO 9303 check digits over the
+passport number, birth date, expiry, and a composite field. Those checks detect OCR errors and
+casual edits, but they are public arithmetic rather than an issuer signature. Authenticating an
+electronic passport requires reading and validating its signed chip over NFC.
 
 **ELA.** Re-encode at quality 90, diff against the original, flag blocks whose mean error is
 above the image's own distribution.
@@ -168,7 +180,7 @@ in the same arithmetic. So checks are tiered and the strongest available tier de
 | Tier | Checks | Weight in verdict |
 |---|---|---|
 | 1 Cryptographic | UIDAI QR signature | Decides outright |
-| 2 Structural | Verhoeff, PAN pattern, marksheet arithmetic | A failure is a hard flag. A pass means little. |
+| 2 Structural | Verhoeff, PAN pattern, passport MRZ, marksheet arithmetic | A failure is a hard flag. A pass means little. |
 | 3 Heuristic | ELA, baseline alignment | Advisory only. Never the sole cause of a flag. |
 
 Six verdicts, and none of them is the word "verified":
@@ -286,9 +298,10 @@ pan.py          PAN structural validation
 marksheet.py    Marksheet checks
 ocr.py          Tesseract wrapper
 ela.py          Error Level Analysis
-face_match.py   ArcFace match + MediaPipe liveness
+face_match.py   ArcFace match + MediaPipe liveness + model-file manifest
 verdict.py      Tiered verdict engine + reason-code catalogue
 store.py        SQLite audit history
+models/         Pretrained weights, fetched by tools/fetch_models.py (gitignored)
 docs/           Setup, ship plan, project state, audits
 ```
 
@@ -298,15 +311,18 @@ docs/           Setup, ship plan, project state, audits
 ./.venv/Scripts/python.exe -m unittest discover -s tests -v
 ```
 
-17 tests, under a second, stdlib only — no pytest needed. They pin the behaviours that matter:
+81 tests, a few seconds, stdlib only — no pytest needed. They pin the behaviours that matter:
 Verhoeff catching every single-digit error and adjacent transposition, every rung of the verdict
 ladder (including that a transplanted QR outranks a valid signature, and that no verdict is ever
 the word "verified"), the marksheet arithmetic check, and the ELA threshold's relationship to
 its own null rate.
 
-Face matching is deliberately **not** in this suite — it needs ~260 MB of model weights and
+Face matching is deliberately **not** in this suite — it needs ~800 MB of model files and
 minutes on a cold cache, which would make it something nobody runs. Use
-`tools/check_face_pipeline.py` for that, separately.
+`tools/check_face_pipeline.py` for that, separately. What the suite does pin
+(`tests/test_model_files.py`) is that the model manifest is complete, that a missing file
+fails fast with the fix in the message instead of downloading mid-request, and that the
+fetch tool never installs a file whose hash does not match.
 
 *(An earlier version of this README told you to run `python tests/test_core.py` before demo day
 when that file did not exist. It does now.)*

@@ -39,11 +39,105 @@ from dataclasses import dataclass, field
 
 import numpy as np
 
+from pathlib import Path
+
+from config import MODELS_DIR, settings
+
 # Cosine-distance thresholds are model-specific. ArcFace at 0.68 is DeepFace's
 # own tuned default; do not reuse a threshold across models.
 MODEL_NAME = "ArcFace"
 DETECTOR = "retinaface"
 MATCH_THRESHOLD = 0.68
+
+# Pretrained model files this module needs, as paths relative to
+# `config.MODELS_DIR`. None of them are in git: two of the DeepFace weights
+# exceed GitHub's 100 MB file cap and the age model is ~540 MB. Instead,
+# `tools/fetch_models.py` downloads each from its upstream release, verifies the
+# SHA-256 and byte size below, and writes it atomically into place. The same
+# table drives `/health` and the launcher's readiness check, so "weights are
+# missing" is reported once at startup rather than as a hung request later.
+#
+# DeepFace and RetinaFace look under `$DEEPFACE_HOME/.deepface/weights/`;
+# MediaPipe Tasks takes an explicit path, so the landmarker sits at the root.
+DEEPFACE_RELEASE = "https://github.com/serengil/deepface_models/releases/download/v1.0/"
+MEDIAPIPE_RELEASE = "https://storage.googleapis.com/mediapipe-models/"
+REQUIRED_MODELS: tuple[dict, ...] = (
+    {
+        "path": ".deepface/weights/arcface_weights.h5",
+        "url": DEEPFACE_RELEASE + "arcface_weights.h5",
+        "sha256": "6336979c0c602cae08d1122a66f4dfb862d059bbcd8ef80306aef2b2249b0c93",
+        "size": 137_026_640,
+        "used_by": "compare_faces (ArcFace embedding)",
+    },
+    {
+        "path": ".deepface/weights/retinaface.h5",
+        "url": DEEPFACE_RELEASE + "retinaface.h5",
+        "sha256": "ecb2393a89da3dd3d6796ad86660e298f62a0c8ae7578d92eb6af14e0bb93adf",
+        "size": 118_667_368,
+        "used_by": "compare_faces + check_age_gap (RetinaFace detector)",
+    },
+    {
+        "path": ".deepface/weights/age_model_weights.h5",
+        "url": DEEPFACE_RELEASE + "age_model_weights.h5",
+        "sha256": "0aeff75734bfe794113756d2bfd0ac823d51e9422c8961125b570871d3c2b114",
+        "size": 538_771_776,
+        "used_by": "check_age_gap (apparent-age regression)",
+    },
+    {
+        "path": "face_landmarker.task",
+        "url": MEDIAPIPE_RELEASE
+        + "face_landmarker/face_landmarker/float16/1/face_landmarker.task",
+        "sha256": "64184e229b263107bc2b804c6625db1341ff2bb731874b0bcc2fe6544e0bc9ff",
+        "size": 3_758_596,
+        "used_by": "check_liveness (MediaPipe Face Landmarker)",
+    },
+)
+
+FACE_LANDMARKER_PATH = MODELS_DIR / "face_landmarker.task"
+
+
+def model_path(relative: str) -> Path:
+    return MODELS_DIR / relative
+
+
+def missing_models(paths: tuple[str, ...] | None = None) -> list[str]:
+    """
+    Relative paths of required model files that are absent or zero-length.
+    A partial file left behind by a killed download reads as present to
+    DeepFace and then fails deep inside Keras; the fetch tool never leaves
+    one, but a manual copy might.
+    """
+    wanted = paths or tuple(entry["path"] for entry in REQUIRED_MODELS)
+    absent = []
+    for relative in wanted:
+        path = MODELS_DIR / relative
+        if not path.is_file() or path.stat().st_size == 0:
+            absent.append(relative)
+    return absent
+
+
+def models_status() -> dict:
+    """Surface for `/health`: what is present, what is not, where to look."""
+    absent = missing_models()
+    return {
+        "face_models_ready": not absent,
+        "face_models_missing": absent,
+        "face_models_dir": str(MODELS_DIR),
+    }
+
+
+class ModelFilesMissing(RuntimeError):
+    """Raised instead of letting DeepFace download ~800 MB inside a request."""
+
+
+def _require_models(*paths: str) -> None:
+    absent = missing_models(paths)
+    if absent:
+        raise ModelFilesMissing(
+            f"missing {', '.join(absent)} under {MODELS_DIR}; "
+            "run `python tools/fetch_models.py`"
+        )
+
 
 EAR_DROP_THRESHOLD = 0.18   # blink: eye-aspect-ratio must fall below this
 YAW_DELTA_THRESHOLD = 0.12  # head turn: normalised horizontal nose shift
@@ -82,6 +176,12 @@ def compare_faces(id_photo: bytes, selfie: bytes) -> FaceMatchResult:
     try:
         _write_normalised(id_photo, id_path)
         _write_normalised(selfie, selfie_path)
+
+        # DeepFace's own fallback is to download the weights on first use,
+        # synchronously, inside this call. On the demo Wi-Fi that is minutes
+        # of a hung request that the frontend reports as a generic failure.
+        # Fail fast with the fix in the message instead.
+        _require_models(".deepface/weights/arcface_weights.h5", ".deepface/weights/retinaface.h5")
 
         from deepface import DeepFace
 
@@ -139,6 +239,85 @@ def compare_faces(id_photo: bytes, selfie: bytes) -> FaceMatchResult:
         selfie = b""
 
 
+@dataclass
+class AgeGapResult:
+    checked: bool
+    id_age: int | None
+    selfie_age: int | None
+    gap_years: int | None
+    threshold_years: int
+    reasons: list[str] = field(default_factory=list)
+    detail: dict = field(default_factory=dict)
+
+
+def _estimate_age(image_bytes: bytes) -> int | None:
+    """
+    Apparent age from DeepFace's pretrained age-estimation model.
+
+    This is a real pretrained regression model shipped with DeepFace (trained
+    by its authors on public age-labelled face datasets) — nothing here is
+    trained or fabricated by this project. It estimates apparent age from a
+    single photo; it does not model how one specific face grows over time.
+    """
+    workspace = tempfile.mkdtemp(prefix="age_")
+    path = os.path.join(workspace, "face.jpg")
+    try:
+        _write_normalised(image_bytes, path)
+        _require_models(".deepface/weights/age_model_weights.h5", ".deepface/weights/retinaface.h5")
+
+        from deepface import DeepFace
+
+        analysis = DeepFace.analyze(
+            img_path=path,
+            actions=["age"],
+            detector_backend=DETECTOR,
+            enforce_detection=True,
+        )
+        result = analysis[0] if isinstance(analysis, list) else analysis
+        return int(result["age"])
+    except Exception:
+        return None
+    finally:
+        _shred(path)
+        shutil.rmtree(workspace, ignore_errors=True)
+
+
+def check_age_gap(id_photo: bytes, selfie: bytes) -> AgeGapResult:
+    """
+    Advisory-only: flag a large apparent-age gap between the ID photo and the
+    live selfie, so a weak match distance has an honest explanation on screen
+    instead of reading as a bare accusation.
+
+    Deliberately heuristic tier and never fatal on its own — see verdict.py's
+    tier rules. This does not adjust MATCH_THRESHOLD; it only adds context.
+    """
+    threshold = settings.age_gap_advisory_years
+    id_age = _estimate_age(id_photo)
+    selfie_age = _estimate_age(selfie)
+
+    if id_age is None or selfie_age is None:
+        return AgeGapResult(
+            checked=False,
+            id_age=id_age,
+            selfie_age=selfie_age,
+            gap_years=None,
+            threshold_years=threshold,
+            reasons=["AGE_ESTIMATION_UNAVAILABLE"],
+        )
+
+    gap = abs(id_age - selfie_age)
+    reason = "AGE_GAP_LARGE" if gap >= threshold else "AGE_GAP_NORMAL"
+    return AgeGapResult(
+        checked=True,
+        id_age=id_age,
+        selfie_age=selfie_age,
+        gap_years=gap,
+        threshold_years=threshold,
+        reasons=[reason],
+        detail={"id_age": id_age, "selfie_age": selfie_age, "gap_years": gap},
+    )
+
+
 def check_liveness(frames: list[bytes], challenge: str = "blink") -> LivenessResult:
     """
     Compare facial landmark geometry across a short burst of frames.
@@ -165,6 +344,9 @@ def check_liveness(frames: list[bytes], challenge: str = "blink") -> LivenessRes
         )
 
     try:
+        # Cheap and import-free, so a missing bundle is reported before any
+        # frame is decoded and before mediapipe (seconds to import) loads.
+        _require_models("face_landmarker.task")
         landmarks = [_landmarks(frame) for frame in frames]
     except RuntimeError as exc:
         return LivenessResult(
@@ -172,7 +354,9 @@ def check_liveness(frames: list[bytes], challenge: str = "blink") -> LivenessRes
             passed=None,
             challenge=challenge,
             reasons=["LIVENESS_BACKEND_UNAVAILABLE"],
-            detail={"error": "Liveness backend unavailable."},
+            # The message names the missing package or model file and the
+            # command that fixes it; without it the UI can only shrug.
+            detail={"error": str(exc)[:200]},
         )
 
     usable = [item for item in landmarks if item is not None]
@@ -227,13 +411,48 @@ def _blink_detected(ratios: list[float]) -> bool:
 
 
 # ---------------------------------------------------------------------------
-# Landmark helpers (MediaPipe Face Mesh)
+# Landmark helpers (MediaPipe Face Landmarker)
 # ---------------------------------------------------------------------------
 
-# Face Mesh indices for the six classic EAR points, per eye.
+# The Face Landmarker task emits the same 478-point topology as the retired
+# `mp.solutions.face_mesh` (468 mesh points plus 10 iris points), so the
+# classic EAR indices carry over unchanged. mediapipe >= 0.10 removed the
+# legacy `solutions` namespace; 1.x only ships the Tasks API, which needs the
+# `.task` bundle on disk rather than baked into the wheel.
 _LEFT_EYE = (33, 160, 158, 133, 153, 144)
 _RIGHT_EYE = (362, 385, 387, 263, 373, 380)
 _NOSE_TIP = 1
+
+_landmarker = None
+
+
+def _get_landmarker():
+    """
+    One FaceLandmarker per process. Building it parses the bundle and spins
+    up the inference graph; doing that per frame would cost more than the
+    inference itself.
+    """
+    global _landmarker
+    if _landmarker is not None:
+        return _landmarker
+
+    try:
+        import mediapipe as mp
+    except ImportError as exc:
+        raise RuntimeError(f"mediapipe missing: {exc}") from exc
+
+    _require_models("face_landmarker.task")
+
+    vision = mp.tasks.vision
+    options = vision.FaceLandmarkerOptions(
+        base_options=mp.tasks.BaseOptions(model_asset_path=str(FACE_LANDMARKER_PATH)),
+        running_mode=vision.RunningMode.IMAGE,
+        num_faces=1,
+        output_face_blendshapes=False,
+        output_facial_transformation_matrixes=False,
+    )
+    _landmarker = vision.FaceLandmarker.create_from_options(options)
+    return _landmarker
 
 
 def _landmarks(frame: bytes) -> np.ndarray | None:
@@ -247,15 +466,17 @@ def _landmarks(frame: bytes) -> np.ndarray | None:
     if array is None:
         return None
 
-    with mp.solutions.face_mesh.FaceMesh(
-        static_image_mode=True, max_num_faces=1, refine_landmarks=True
-    ) as mesh:
-        result = mesh.process(cv2.cvtColor(array, cv2.COLOR_BGR2RGB))
+    landmarker = _get_landmarker()
+    image = mp.Image(
+        image_format=mp.ImageFormat.SRGB,
+        data=np.ascontiguousarray(cv2.cvtColor(array, cv2.COLOR_BGR2RGB)),
+    )
+    result = landmarker.detect(image)
 
-    if not result.multi_face_landmarks:
+    if not result.face_landmarks:
         return None
-    face = result.multi_face_landmarks[0]
-    return np.array([[point.x, point.y] for point in face.landmark], dtype=np.float32)
+    face = result.face_landmarks[0]
+    return np.array([[point.x, point.y] for point in face], dtype=np.float32)
 
 
 def _eye_aspect_ratio(points: np.ndarray) -> float:

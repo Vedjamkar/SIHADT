@@ -12,6 +12,10 @@ PAN OCR:
     - Recovers common OCR character mistakes.
     - Ranks PAN candidates instead of trusting the first OCR match.
 
+Passport OCR:
+    - Crops and enlarges the MRZ area at the bottom of the data page.
+    - Uses MRZ-only character whitelisting and line-oriented passes.
+
 This module extracts text only. PAN validation remains in pan.py.
 """
 
@@ -25,6 +29,7 @@ from functools import lru_cache
 from PIL import Image, ImageEnhance, ImageFilter, ImageOps
 
 OCR_WORKING_EDGE = 2400
+MRZ_WHITELIST = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789<"
 
 
 # ---------------------------------------------------------------------------
@@ -218,6 +223,19 @@ def _pan_preprocessed_images(image_bytes: bytes) -> list[Image.Image]:
         images.append(_threshold(region_gray, 180))
 
     return images
+
+
+def _passport_preprocessed_images(image_bytes: bytes) -> list[Image.Image]:
+    """Build focused OCR inputs for the two MRZ lines on a passport page."""
+    original = _load_color_image(image_bytes)
+    width, height = original.size
+
+    # The TD3 MRZ occupies the bottom of the photo page. A broad crop leaves
+    # room for perspective and imperfect framing while excluding most labels
+    # that otherwise confuse Tesseract's line segmentation.
+    region = original.crop((0, int(height * 0.55), width, height))
+    gray = _upscale(_gray(region), 3)
+    return [gray, _sharpen(gray), _threshold(gray, 165)]
 
 
 # ---------------------------------------------------------------------------
@@ -440,11 +458,17 @@ def _easyocr_reader():
 # Main extraction
 # ---------------------------------------------------------------------------
 
-def extract_text(image_bytes: bytes, *, pan_mode: bool = False) -> OCRResult:
+def extract_text(
+    image_bytes: bytes,
+    *,
+    pan_mode: bool = False,
+    passport_mode: bool = False,
+) -> OCRResult:
     """
     Extract text, Aadhaar numbers, PAN numbers, dates and years.
 
-    PAN extraction gets additional targeted OCR passes.
+    PAN and passport extraction get separate targeted OCR passes. They are
+    opt-in so other document types do not pay for irrelevant OCR work.
     """
 
     # ---------------------------------------------------------
@@ -526,6 +550,29 @@ def extract_text(image_bytes: bytes, *, pan_mode: bool = False) -> OCRResult:
 
     except Exception:
         pass
+
+    # ---------------------------------------------------------
+    # Passport MRZ-specific OCR
+    # ---------------------------------------------------------
+
+    if passport_mode:
+        try:
+            import pytesseract
+
+            configs = [
+                f"--oem 3 --psm 6 -c tessedit_char_whitelist={MRZ_WHITELIST}",
+                f"--oem 3 --psm 7 -c tessedit_char_whitelist={MRZ_WHITELIST}",
+            ]
+            for image in _passport_preprocessed_images(image_bytes):
+                for config in configs:
+                    try:
+                        mrz_text = pytesseract.image_to_string(image, config=config)
+                        if mrz_text:
+                            text_parts.append(mrz_text)
+                    except Exception:
+                        continue
+        except Exception:
+            pass
 
     # ---------------------------------------------------------
     # Combine OCR text

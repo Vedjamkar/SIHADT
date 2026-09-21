@@ -23,7 +23,7 @@ const disclaimer = 'This tool does not query any government database and is not 
 window.fetch = (url, options) => {
   const path = new URL(String(url), location.href).pathname;
   let body;
-  if (path === '/health') body = {status:'ok',uidai_certificate_loaded:false,uidai_certificate_fingerprint:null,uidai_certificate_pinned:false,consent_enforcement:true,consent_subjects_configured:1};
+  if (path === '/health') body = {status:'ok',uidai_certificate_loaded:false,uidai_certificate_fingerprint:null,uidai_certificate_fingerprints:[],uidai_certificates_loaded:0,uidai_certificate_pinned:false,consent_enforcement:true,consent_subjects_configured:1,face_models_ready:true,face_models_missing:[],face_models_dir:'models'};
   if (path === '/reasons') body = {reasons:{}};
   if (path === '/dashboard/history') body = {records:window.__history,disclaimer};
   if (path === '/dashboard/summary') body = {by_verdict:{},by_doc_type:{},trend:[],top_reasons:[],disclaimer};
@@ -135,6 +135,15 @@ def main():
         click(browser, '^Run check$')
         wait_for(browser, "document.querySelector('.result-view')")
         print('PASS: animated image-derived heatmap, original toggle, visible server maps and error retry')
+
+        click(browser, '^Check another document$')
+        click(browser, 'Start with Passport')
+        assert browser.js("return document.body.innerText.includes('Passport data page');")
+        browser.js('await window.__attach(); window.__responseDelay=100;')
+        click(browser, '^Run check$')
+        wait_for(browser, "document.querySelector('.result-view')")
+        assert browser.js("return window.__requests.at(-1).url.endsWith('/verify/passport');")
+        print('PASS: passport picker, upload form, and API submission')
 
         click(browser, '^Face check$')
         wait_for(browser, "document.querySelector('.face-capture')")

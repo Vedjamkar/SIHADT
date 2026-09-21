@@ -52,9 +52,15 @@ export interface HealthResponse {
   status: string;
   uidai_certificate_loaded: boolean;
   uidai_certificate_fingerprint: string | null;
+  uidai_certificate_fingerprints: string[];
+  uidai_certificates_loaded: number;
   uidai_certificate_pinned: boolean;
   consent_enforcement: boolean;
   consent_subjects_configured: number;
+  /** Pretrained face-pipeline files are not in git; see tools/fetch_models.py. */
+  face_models_ready: boolean;
+  face_models_missing: string[];
+  face_models_dir: string;
 }
 
 export interface ReasonsResponse {
@@ -99,4 +105,4 @@ export interface SummaryResponse {
   disclaimer: string;
 }
 
-export type DocumentKind = "aadhaar" | "aadhaar-full" | "pan" | "marksheet" | "face";
+export type DocumentKind = "aadhaar" | "aadhaar-full" | "pan" | "passport" | "marksheet" | "face";

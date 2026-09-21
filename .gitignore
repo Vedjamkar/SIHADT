@@ -34,4 +34,18 @@ Thumbs.db
 # Dev server logs
 frontend_run.log
 *.log
+.runtime/
 .claude/
+
+# Pretrained model files (~800 MB; two exceed GitHub's 100 MB cap). Fetched
+# by tools/fetch_models.py into models/, which face_match.py reads via
+# DEEPFACE_HOME. Only the README describing them is tracked.
+models/*
+!models/README.md
+*.h5
+*.task
+
+# Biometric evaluation inputs and generated reports stay local. Manifests and
+# documentation under datasets/age_gap remain trackable.
+datasets/age_gap/images/
+reports/age_gap/

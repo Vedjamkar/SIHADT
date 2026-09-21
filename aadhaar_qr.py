@@ -38,6 +38,7 @@ import hashlib
 import io
 import sys
 import zlib
+from collections.abc import Sequence
 from dataclasses import dataclass, field
 from typing import Any
 
@@ -45,6 +46,8 @@ from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import padding, rsa
 from cryptography.hazmat.primitives.serialization import Encoding, load_pem_public_key
 from cryptography.x509 import load_der_x509_certificate, load_pem_x509_certificate
+
+UIDAIPublicKeys = rsa.RSAPublicKey | Sequence[rsa.RSAPublicKey] | None
 
 # Python 3.11+ refuses int <-> str conversions beyond 4300 digits as a
 # denial-of-service guard. A Secure QR payload is a decimal integer covering the
@@ -337,7 +340,7 @@ def read_qr_payloads(image_bytes: bytes) -> list[str]:
 # Payload -> structured result
 # ---------------------------------------------------------------------------
 
-def parse_payload(payload: str, uidai_public_key: rsa.RSAPublicKey | None) -> AadhaarQRResult:
+def parse_payload(payload: str, uidai_public_key: UIDAIPublicKeys) -> AadhaarQRResult:
     payload = payload.strip()
 
     if payload.startswith("<?xml") or "PrintLetterBarcodeData" in payload:
@@ -347,6 +350,34 @@ def parse_payload(payload: str, uidai_public_key: rsa.RSAPublicKey | None) -> Aa
         return _parse_v2(payload, uidai_public_key)
 
     raise QRDecodeError("Payload is neither legacy XML nor a Secure QR integer string")
+
+
+def _verify_signature(
+    signature: bytes,
+    signed_region: bytes,
+    uidai_public_key: UIDAIPublicKeys,
+) -> bool | None:
+    """Return true when any pinned UIDAI key validates the Secure QR signature."""
+    if isinstance(uidai_public_key, rsa.RSAPublicKey):
+        candidate_keys = (uidai_public_key,)
+    else:
+        candidate_keys = tuple(uidai_public_key or ())
+
+    if not candidate_keys:
+        return None
+
+    for candidate_key in candidate_keys:
+        try:
+            candidate_key.verify(
+                signature,
+                signed_region,
+                padding.PKCS1v15(),
+                hashes.SHA256(),
+            )
+            return True
+        except Exception:
+            continue
+    return False
 
 
 def _parse_v1(payload: str) -> AadhaarQRResult:
@@ -407,7 +438,7 @@ def _split_text_fields(data: bytes, count: int) -> tuple[list[bytes], int]:
     return fields, start
 
 
-def _parse_v2(payload: str, uidai_public_key: rsa.RSAPublicKey | None) -> AadhaarQRResult:
+def _parse_v2(payload: str, uidai_public_key: UIDAIPublicKeys) -> AadhaarQRResult:
     try:
         big_integer = int(payload)
     except ValueError as exc:
@@ -426,23 +457,15 @@ def _parse_v2(payload: str, uidai_public_key: rsa.RSAPublicKey | None) -> Aadhaa
     signed_region = data[:-SIGNATURE_LENGTH]
     signature = data[-SIGNATURE_LENGTH:]
 
-    signature_verified: bool | None
-    if uidai_public_key is None:
-        signature_verified = None
+    signature_verified = _verify_signature(
+        signature, signed_region, uidai_public_key
+    )
+    if signature_verified is None:
         reasons.append("UIDAI_CERT_NOT_CONFIGURED")
     else:
-        try:
-            uidai_public_key.verify(
-                signature,
-                signed_region,
-                padding.PKCS1v15(),
-                hashes.SHA256(),
-            )
-            signature_verified = True
-            reasons.append("QR_SIGNATURE_VALID")
-        except Exception:
-            signature_verified = False
-            reasons.append("QR_SIGNATURE_INVALID")
+        reasons.append(
+            "QR_SIGNATURE_VALID" if signature_verified else "QR_SIGNATURE_INVALID"
+        )
 
     # --- text fields
     #
@@ -624,7 +647,7 @@ def load_uidai_public_key(
 
 def verify_aadhaar_image(
     image_bytes: bytes,
-    uidai_public_key: rsa.RSAPublicKey | None,
+    uidai_public_key: UIDAIPublicKeys,
 ) -> AadhaarQRResult:
     payloads = read_qr_payloads(image_bytes)
     if not payloads:

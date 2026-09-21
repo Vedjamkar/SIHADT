@@ -96,6 +96,21 @@ class TestOCRRouting(unittest.TestCase):
                     main.ocr.extract_text(_image_bytes(), pan_mode=pan_mode)
                 self.assertEqual(preprocess.call_count, expected_calls)
 
+    def test_passport_preprocessing_only_runs_in_passport_mode(self):
+        fake_tesseract = SimpleNamespace(image_to_string=lambda *args, **kwargs: "")
+        for passport_mode, expected_calls in ((False, 0), (True, 1)):
+            with self.subTest(passport_mode=passport_mode):
+                with (
+                    patch.dict(sys.modules, {"pytesseract": fake_tesseract}),
+                    patch.object(
+                        main.ocr, "_passport_preprocessed_images", return_value=[]
+                    ) as preprocess,
+                ):
+                    main.ocr.extract_text(
+                        _image_bytes(), passport_mode=passport_mode
+                    )
+                self.assertEqual(preprocess.call_count, expected_calls)
+
 
 class TestUploadAdmission(unittest.IsolatedAsyncioTestCase):
     async def test_upload_read_is_bounded(self):

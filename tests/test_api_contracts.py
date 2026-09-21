@@ -25,6 +25,7 @@ import ela  # noqa: E402
 import face_match  # noqa: E402
 import main  # noqa: E402
 import ocr  # noqa: E402
+import passport  # noqa: E402
 
 
 class TestEmbeddedPdfQR(unittest.TestCase):
@@ -142,6 +143,35 @@ class TestDocumentEndpointContracts(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(response["details"]["qr_version"], "UNKNOWN")
 
 
+class TestPassportEndpointContract(unittest.IsolatedAsyncioTestCase):
+    SPECIMEN = (
+        "P<UTOERIKSSON<<ANNA<MARIA<<<<<<<<<<<<<<<<<<<\n"
+        "L898902C36UTO7408122F1204159ZE184226B<<<<<10"
+    )
+
+    async def test_passport_route_uses_targeted_ocr_and_returns_redacted_mrz(self):
+        text = ocr.OCRResult(engine="mock", text=self.SPECIMEN)
+        mrz = passport.parse(self.SPECIMEN)
+        forensic = {"reasons": []}
+        with (
+            patch.object(main.ocr, "extract_text", return_value=text) as extract,
+            patch.object(main.ela, "analyse", return_value=EMPTY_ELA),
+            patch.object(main.forensics, "analyse_all", return_value=forensic),
+            patch.object(main.forensics, "render_maps", return_value={}),
+            patch.object(main.store, "record", return_value="passport-record") as record,
+        ):
+            response = await main.verify_passport(_Upload(_png()))
+
+        extract.assert_called_once_with(_png(), passport_mode=True)
+        self.assertEqual(response["record_id"], "passport-record")
+        self.assertEqual(response["verdict"], "UNVERIFIABLE")
+        self.assertTrue(response["details"]["mrz_found"])
+        self.assertEqual(response["details"]["mrz"], mrz.redacted())
+        self.assertNotIn("ERIKSSON", str(response))
+        self.assertIsNone(response["details"]["ela"]["heatmap_png_base64"])
+        self.assertEqual(record.call_args.kwargs["doc_type"], "passport")
+
+
 class TestFaceEndpointContracts(unittest.IsolatedAsyncioTestCase):
     """Exercise each attempted binding state through /verify/face."""
 
@@ -171,11 +201,23 @@ class TestFaceEndpointContracts(unittest.IsolatedAsyncioTestCase):
                     challenge="blink" if live is not None else None,
                     reasons=[],
                 )
+                age_gap = face_match.AgeGapResult(
+                    checked=False,
+                    id_age=None,
+                    selfie_age=None,
+                    gap_years=None,
+                    threshold_years=12,
+                    reasons=["AGE_ESTIMATION_UNAVAILABLE"],
+                )
                 with (
                     patch.object(main, "consent_gate", return_value="synthetic"),
                     patch.object(main, "read_live_frames", new=AsyncMock(return_value=[_png()] * 3)),
                     patch.object(main.face_match, "compare_faces", return_value=match),
                     patch.object(main.face_match, "check_liveness", return_value=liveness),
+                    # Unpatched, this runs the real age model. With the model
+                    # files present that is TensorFlow plus ~2 minutes; the
+                    # binding states under test never depend on it.
+                    patch.object(main.face_match, "check_age_gap", return_value=age_gap),
                     patch.object(main.store, "record", return_value="face-record"),
                 ):
                     response = await main.verify_face(

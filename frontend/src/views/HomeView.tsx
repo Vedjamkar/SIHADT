@@ -4,16 +4,17 @@ interface HomeViewProps {
   onStartCheck: () => void;
   onStartFace: () => void;
   onViewDashboard: () => void;
+  onOpenOrganizer: () => void;
 }
 
-export function HomeView({ onStartCheck, onStartFace, onViewDashboard }: HomeViewProps) {
+export function HomeView({ onStartCheck, onStartFace, onViewDashboard, onOpenOrganizer }: HomeViewProps) {
   return (
     <div className="home">
       <div className="home-intro-grid">
         <section className="hero">
           <h1 className="hero__title">Check a document<br />or compare a face.</h1>
           <p className="hero__subtitle">
-            Upload an Aadhaar, PAN card, or marksheet to check its details.
+            Upload an Aadhaar, passport, PAN card, or marksheet to check its details.
             You can also compare an ID photo with a live camera capture.
           </p>
           <div className="hero__actions">
@@ -22,6 +23,9 @@ export function HomeView({ onStartCheck, onStartFace, onViewDashboard }: HomeVie
           </div>
           <button type="button" className="hero__text-link" onClick={onViewDashboard}>
             View previous checks
+          </button>
+          <button type="button" className="hero__text-link" onClick={onOpenOrganizer}>
+            Organize saved documents
           </button>
         </section>
         <SyntheticScan />

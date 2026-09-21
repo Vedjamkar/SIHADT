@@ -1,0 +1,5 @@
+image_id,subject_id,image_path,capture_age_years,split,source,rights_basis,synthetic,sha256
+dev-p001-younger,P001,images/development/P001/age-18__id-photo.jpg,18,development,consented-local,consent-register-v1,false,REPLACE_WITH_64_CHARACTER_SHA256
+dev-p001-current,P001,images/development/P001/age-24__current.jpg,24,development,consented-local,consent-register-v1,false,REPLACE_WITH_64_CHARACTER_SHA256
+test-p101-younger,P101,images/test/P101/age-19__id-photo.jpg,19,test,consented-local,consent-register-v1,false,REPLACE_WITH_64_CHARACTER_SHA256
+test-p101-current,P101,images/test/P101/age-31__current.jpg,31,test,consented-local,consent-register-v1,false,REPLACE_WITH_64_CHARACTER_SHA256

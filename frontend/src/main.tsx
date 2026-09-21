@@ -8,6 +8,7 @@ import './styles/base.css'
 import './styles/components.css'
 import './styles/views.css'
 import './styles/workspace.css'
+import './styles/organizer.css'
 import App from './App.tsx'
 
 createRoot(document.getElementById('root')!).render(

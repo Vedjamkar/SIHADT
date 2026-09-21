@@ -1,6 +1,6 @@
 import { ThemeToggle } from "./ThemeToggle";
 
-export type View = "home" | "verify" | "face" | "dashboard";
+export type View = "home" | "verify" | "organizer" | "face" | "dashboard";
 
 interface NavBarProps {
   view: View;
@@ -11,6 +11,7 @@ interface NavBarProps {
 const LINKS: { view: View; label: string }[] = [
   { view: "home", label: "Home" },
   { view: "verify", label: "Verify" },
+  { view: "organizer", label: "Documents" },
   { view: "face", label: "Face check" },
   { view: "dashboard", label: "Dashboard" },
 ];

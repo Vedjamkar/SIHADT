@@ -3,11 +3,11 @@ import type { VerifyResponse } from "../types/api";
 import { VerdictCard } from "./VerdictCard";
 import { BindingBadge } from "./BindingBadge";
 import { EvidenceLadder } from "./EvidenceLadder";
-import { ReasonList } from "./ReasonList";
 import { DetailsPanel } from "./DetailsPanel";
 import { Disclaimer } from "./Disclaimer";
 import { animateVerdictReveal } from "../motion";
 import { FaceEvidence } from "./FaceEvidence";
+import { ResultInterpretation } from "./ResultInterpretation";
 
 interface ResultViewProps {
   result: VerifyResponse;
@@ -32,6 +32,7 @@ interface ResultViewProps {
  */
 export function ResultView({ result, onCheckAnother }: ResultViewProps) {
   const rootRef = useRef<HTMLDivElement>(null);
+  const resultTone = result.verdict.toLowerCase().replaceAll("_", "-");
 
   useEffect(() => {
     animateVerdictReveal(rootRef.current);
@@ -40,28 +41,19 @@ export function ResultView({ result, onCheckAnother }: ResultViewProps) {
   }, [result.record_id]);
 
   return (
-    <div className="result-view" ref={rootRef} data-anim="verdict-card">
+    <div className={`result-view result-view--${resultTone}`} ref={rootRef} data-anim="verdict-card">
       <VerdictCard verdict={result.verdict} headline={result.headline} decidedBy={result.decided_by} />
 
-      <EvidenceLadder decidedBy={result.decided_by} reasons={result.reasons} advisory={result.advisory} />
+      <ResultInterpretation
+        verdict={result.verdict}
+        decidedBy={result.decided_by}
+        reasons={result.reasons}
+        advisory={result.advisory}
+        details={result.details}
+      />
 
-      <div className="result-view__section">
-        <ReasonList
-          title="What this proves"
-          reasons={result.reasons}
-          emptyMessage="No checks reached a conclusive tier for this document."
-        />
-      </div>
-
-      <div className="result-view__section">
-        <ReasonList
-          title="What could not be determined / other observations"
-          reasons={result.advisory}
-          emptyMessage="Nothing else notable."
-        />
-      </div>
-
-      <div className="result-view__section">
+      <div className="result-view__evidence">
+        <EvidenceLadder decidedBy={result.decided_by} reasons={result.reasons} advisory={result.advisory} />
         <BindingBadge binding={result.identity_binding} />
       </div>
 

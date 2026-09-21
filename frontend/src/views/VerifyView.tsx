@@ -12,6 +12,8 @@ interface VerifyViewProps {
   onSubmit: (payload: SubmitPayload) => void;
   onCheckAnother: () => void;
   initialKind?: DocumentKind;
+  initialDocument?: File;
+  initialBackDocument?: File;
 }
 
 type Step = "choose" | "details";
@@ -24,7 +26,7 @@ type Step = "choose" | "details";
  * step in a single click, so this stays quick rather than a forced
  * multi-page wizard.
  */
-export function VerifyView({ phase, result, onSubmit, onCheckAnother, initialKind }: VerifyViewProps) {
+export function VerifyView({ phase, result, onSubmit, onCheckAnother, initialKind, initialDocument, initialBackDocument }: VerifyViewProps) {
   const [step, setStep] = useState<Step>(initialKind ? "details" : "choose");
   const [kind, setKind] = useState<DocumentKind>(initialKind ?? "aadhaar");
 
@@ -57,6 +59,8 @@ export function VerifyView({ phase, result, onSubmit, onCheckAnother, initialKin
       phase={phase}
       onBack={() => setStep("choose")}
       onSubmit={onSubmit}
+      initialDocument={initialDocument}
+      initialBackDocument={initialBackDocument}
     />
   );
 }

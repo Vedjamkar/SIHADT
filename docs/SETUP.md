@@ -58,6 +58,26 @@ Then, separately, the face stack (large — pulls TensorFlow):
 pip install deepface tf-keras mediapipe
 ```
 
+### Model files (not in git)
+
+The face stack is code only. The pretrained weights it runs — ArcFace, RetinaFace,
+DeepFace's age regressor, and MediaPipe's Face Landmarker bundle — total ~800 MB and are
+**not in the repository** (two of them are over GitHub's 100 MB per-file limit). Fetch them
+once:
+
+```bash
+python tools/fetch_models.py
+```
+
+They land in `models/` (gitignored; see [`models/README.md`](../models/README.md)), each
+checked against the SHA-256 pinned in `face_match.REQUIRED_MODELS`. `Launch VERIFai.cmd`
+runs this step for you. Until it has succeeded, `/health` reports `face_models_ready: false`
+and the face-match, age-gap, and liveness checks return an error naming the command to run —
+they no longer try to download inside the request. Document checks work regardless.
+
+If someone on the team already ran an older build, their copies in `%USERPROFILE%\.deepface\weights`
+are reused instead of re-downloaded.
+
 ---
 
 ## 3. Native binaries — the part that actually breaks
@@ -65,7 +85,7 @@ pip install deepface tf-keras mediapipe
 Two Python packages are thin wrappers around native programs. Installing the Python package
 does **not** install the program.
 
-### Tesseract (needed for PAN and marksheet OCR)
+### Tesseract (needed for passport, PAN, and marksheet OCR)
 
 `pip install pytesseract` gives you a wrapper, not the OCR engine. On Windows, get the
 installer from the UB-Mannheim build (the de-facto standard Windows distribution of Tesseract),
@@ -83,7 +103,7 @@ tesseract --version
 ```
 
 If that command is not found, OCR will fail at runtime with
-`TesseractNotFoundError` — the API starts fine and only the PAN and marksheet
+`TesseractNotFoundError` — the API starts fine and only the passport, PAN, and marksheet
 endpoints break. **This is the current state on at least one team machine.**
 
 ### zbar (needed for QR decoding)
@@ -95,31 +115,44 @@ the error message does not say so.
 
 ---
 
-## 4. The UIDAI certificate — required for the showpiece
+## 4. UIDAI certificates — required for the showpiece
 
-**Nothing cryptographic works without this.** No certificate ships with the repo.
+**Nothing cryptographic works without these.** Certificates do not ship with the repo.
 
-Download the public certificate for Secure QR / offline e-KYC signature validation from
-[UIDAI's certificate details page](https://uidai.gov.in/en/916-developer-section/data-and-downloads-section/19388-uidai-certificate-details-2.html).
+Download the production certificates listed under Offline e-KYC and Secure QR Code on
+[UIDAI's current certificate page](https://uidai.gov.in/en/data-and-download). Keep their
+official filenames under `certs/`:
+
+`uidai_offline_publickey_2026.cer`, `uidai_offline_publickey_17022026.cer`,
+`uidai_offline_publickey_26022021.cer`, `uidai_offline_publickey_29032019.cer`,
+`uidai_offline_publickey_26022019.cer`, `uidai_12_06_18_cer.cer`, and
+`uidai_prod_cdup.cer`.
+
+The expected SHA-256 fingerprints are pinned in `config.py`. The app loads only those exact
+entries, so placing another certificate in the directory does not add it to the trust set.
+Historical keys matter because a newly downloaded PDF can still carry a QR signed under an
+older UIDAI key.
+
+Fetch and fingerprint-check the complete set from UIDAI:
 
 ```bash
-mkdir certs
-# place the file at certs/uidai_signing.cer
+python tools/fetch_uidai_certificates.py
 ```
 
-Or point somewhere else with an environment variable:
+For a deliberate single-certificate or mock test, override both values:
 
 ```bash
 set UIDAI_CERT_PATH=C:\path\to\uidai_signing.cer
+set UIDAI_CERT_FINGERPRINT=the_64_character_sha256_fingerprint
 ```
 
 > **Read this before you lose a day.** The certificate you find most easily by searching —
 > `uidai_auth_stage.cer` — is the **staging/test** certificate. It will **not** verify a real
-> production Aadhaar card. Production cards are signed with the production key. If a card
-> everyone is certain is genuine fails verification, check which certificate is loaded
+> production Aadhaar card. Production cards are signed with rotating production keys. If a card
+> everyone is certain is genuine fails verification, check which certificates are loaded
 > *before* concluding the code is broken.
 
-Without a certificate the system does **not** silently pass documents. It reports
+Without any certificate the system does **not** silently pass documents. It reports
 `UIDAI_CERT_NOT_CONFIGURED` and returns `UNVERIFIABLE` for every Aadhaar — correct behaviour,
 but it means the demo shows nothing.
 
@@ -150,8 +183,10 @@ Then open **http://localhost:8000/docs** — FastAPI generates an interactive pa
 upload files to each endpoint without writing any frontend code. Use this to test everything
 before the UI exists.
 
-Health check: **http://localhost:8000/health** — tells you whether the certificate loaded and
-whether consent enforcement is on.
+Health check: **http://localhost:8000/health** — tells you whether the certificate loaded,
+whether consent enforcement is on, and whether the face-pipeline model files are present
+(`face_models_ready`, with `face_models_missing` listing what `tools/fetch_models.py` still
+has to fetch).
 
 ### Corrections to the old README
 
@@ -188,3 +223,6 @@ uvicorn main:app --reload --port 8000
 | A genuine card fails signature verification | Staging certificate loaded instead of production | §4 |
 | `403` on face endpoints | `CONSENT_SUBJECTS` not set, or subject not in it | §5 — this is intended behaviour |
 | mediapipe / tf-keras will not install | Python 3.13+ | §1 — use 3.12 |
+| Face match returns `FACE_MATCH_ERROR` with `ModelFilesMissing`, or `/health` says `face_models_ready: false` | Model files not fetched | §2 — `python tools/fetch_models.py` |
+| Liveness returns `LIVENESS_BACKEND_UNAVAILABLE` naming `face_landmarker.task` | Same — the MediaPipe bundle is fetched by the same script | §2 |
+| `module 'mediapipe' has no attribute 'solutions'` | mediapipe 1.x removed the legacy API; `face_match.py` now uses the Tasks API | Pull latest; make sure `models/face_landmarker.task` exists |

@@ -21,6 +21,7 @@ The backend must allow the frontend origin through its CORS configuration.
 ## Verification workspace
 
 - Aadhaar checks the signed QR and printed document. Aadhaar + identity adds a live face comparison.
+- Passport reads the photo-page MRZ, validates ICAO check digits, and reports expiry; it cannot authenticate the NFC chip.
 - PAN and marksheets provide structural checks; a clean structure does not establish issuance.
 - Face check compares a reference portrait with a camera sequence and a blink or head-turn prompt.
 - The scan animation derives its preview from the uploaded image. It is a browser visualisation, not live server findings. The API returns one final response.

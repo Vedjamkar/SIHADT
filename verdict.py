@@ -148,6 +148,9 @@ REASON_TEXT: dict[str, str] = {
     "LIVENESS_CHALLENGE_INVALID": "Liveness challenge must be blink or head turn.",
     "LIVENESS_BACKEND_UNAVAILABLE": "Liveness backend is not installed.",
     "LIVENESS_REPLAY_ATTACK_NOT_COVERED": "This check defeats printed photos but not video replay or screen replay.",
+    "AGE_GAP_LARGE": "The ID photo and the live selfie show a large apparent age gap. A weak or borderline face-match distance can be explained by this rather than by a different person. Advisory only.",
+    "AGE_GAP_NORMAL": "The ID photo and the live selfie show a comparable apparent age.",
+    "AGE_ESTIMATION_UNAVAILABLE": "Apparent age could not be estimated for one or both images.",
     "IDENTITY_NOT_CHECKED": "No selfie supplied, so the document was not bound to a live person.",
     "MARKSHEET_SELECTION_COUNT_INVALID":
     "Exactly five subjects must be selected.",
@@ -193,6 +196,7 @@ for _code in (
     "ELA_LOCALISED_ANOMALY",
     "BASELINE_IRREGULARITY_ADVISORY",
     "PAN_SURNAME_INITIAL_MISMATCH",
+    "AGE_GAP_LARGE",
 ):
     TIER_OF_REASON[_code] = Tier.HEURISTIC
 

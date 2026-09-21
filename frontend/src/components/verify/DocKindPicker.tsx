@@ -5,7 +5,7 @@ interface DocKindPickerProps {
   onSelect: (kind: DocumentKind) => void;
 }
 
-const ORDER: DocumentKind[] = ["aadhaar", "aadhaar-full", "pan", "marksheet"];
+const ORDER: DocumentKind[] = ["aadhaar", "aadhaar-full", "passport", "pan", "marksheet"];
 
 /**
  * The first screen of the verify flow: choose a document type before

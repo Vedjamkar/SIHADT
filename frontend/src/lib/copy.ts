@@ -105,6 +105,7 @@ export const TIER_ORDER: ReasonTier[] = ["cryptographic", "structural", "heurist
 export const DOC_TYPE_LABEL: Record<string, string> = {
   aadhaar: "Aadhaar",
   pan: "PAN",
+  passport: "Passport",
   marksheet: "Marksheet",
   face: "Face check",
 };
@@ -157,6 +158,16 @@ export const DOC_KIND_INFO: Record<DocumentKind, DocKindInfo> = {
       "There is no signed data to check on a PAN. The best possible outcome here is UNVERIFIABLE — that's expected, not a shortfall.",
     fields: "One image of the card.",
   },
+  passport: {
+    label: "Passport",
+    tagline: "MRZ checksum and expiry checks",
+    description:
+      "Reads the machine-readable zone on the photo page and checks the passport number, birth date, expiry date, and composite check digits.",
+    ceiling: "structural",
+    ceilingNote:
+      "MRZ check digits prove internal consistency, not issuer authenticity. Chip verification requires an NFC passport reader.",
+    fields: "One clear image or PDF of the complete photo page, including both MRZ lines.",
+  },
   marksheet: {
     label: "Marksheet",
     tagline: "Arithmetic and structural checks",
@@ -198,6 +209,11 @@ export const CHECKING_STEPS: Record<DocumentKind, string[]> = {
     "Comparing the live face to the document photo",
   ],
   pan: ["Reading the document fields", "Checking structural consistency"],
+  passport: [
+    "Locating the machine-readable zone",
+    "Reading passport fields",
+    "Checking ICAO check digits and expiry",
+  ],
   marksheet: [
     "Reading the marksheet fields",
     "Verifying subject totals and formatting",
